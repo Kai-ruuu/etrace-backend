@@ -223,27 +223,24 @@ class UploadManager:
         
         # PHASE 3: IMAGE RESIZING (for images only)
         # would also help us determine if the image file is a real image, (disguised ones can't be resized XD)
-        if not magic_mime.startswith("image/"):
-            return
-            
-        try:
-            path = str(temp_file_path)
-            
-            with Image.open(path) as img:
-                img.load()
-                img.thumbnail(size=self.image_resize_size)
-                img.save(temp_file_path)
-        except Exception as e:
-            print(f"[DEBUG] Cannot resize image - {repr(e)}")
-            self.rollback()
-            raise RAISE_IMAGE_FILE_CANNOT_BE_READ_EXCEPTION_FOR(upload.dest_folder.value)
+        if magic_mime.startswith("image/"):
+            try:
+                path = str(temp_file_path)
+                
+                with Image.open(path) as img:
+                    img.load()
+                    img.thumbnail(size=self.image_resize_size)
+                    img.save(temp_file_path)
+            except Exception as e:
+                print(f"[DEBUG] Cannot resize image - {repr(e)}")
+                self.rollback()
+                raise RAISE_IMAGE_FILE_CANNOT_BE_READ_EXCEPTION_FOR(upload.dest_folder.value)
         
         self.staged_files_info[upload.dest_folder.value] = {
             "filename": new_filename,
             "temp_file_path": temp_file_path,
             "real_file_path": real_file_path
         }
-        print(self.staged_files_info[upload.dest_folder.value])
     
     def stage_uploads(self, uploads: list[Upload]) -> None:
         """Stage a list of uploads."""
