@@ -1,0 +1,7 @@
+.env
+.venv
+__pycache__
+
+storage
+todo.txt
+company_requirements.jpg
