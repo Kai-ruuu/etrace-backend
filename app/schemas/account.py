@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 from app.core.enums import AccountRole
 from app.schemas.dean_profile import DeanProfileOut
@@ -11,6 +11,7 @@ from app.schemas.system_admin_profile import SystemAdminProfileOut
 class AccountBase(BaseModel):
     email: str
     model_config = {"from_attributes": True}
+
     
 class AccountOutBase(AccountBase):
     id: int
@@ -20,21 +21,26 @@ class AccountOutBase(AccountBase):
     updated_at: datetime
     model_config = {"from_attributes": True}
 
+
 class DeanAccountOut(AccountOutBase):
     profile: DeanProfileOut
     model_config = {"from_attributes": True}
+
 
 class AlumniAccountOut(AccountOutBase):
     profile: AlumniProfileOut
     model_config = {"from_attributes": True}
 
+
 class CompanyAccountOut(AccountOutBase):
     profile: CompanyProfileOut
     model_config = {"from_attributes": True}
 
+
 class PesoStaffAccountOut(AccountOutBase):
     profile: PesoStaffProfileOut
     model_config = {"from_attributes": True}
+
 
 class SystemAdminAccountOut(AccountOutBase):
     profile: SystemAdminProfileOut
@@ -51,3 +57,24 @@ class SystemAdminAccountOut(AccountOutBase):
             updated_at=account.updated_at,
             profile=account.system_admin_profile
         )
+
+
+class AdminAccountInBase(BaseModel):
+    email: EmailStr
+    first_name: str
+    middle_name: str | None = None
+    last_name: str
+    
+
+class SystemAdminAccountIn(AdminAccountInBase):
+    pass
+    
+
+class DeanAccountIn(AdminAccountInBase):
+    school_id: int
+    
+
+class PesoStaffAccountIn(AdminAccountInBase):
+    pass
+
+

@@ -10,6 +10,9 @@ class Action(StrEnum):
     CREATE_PESO_STAFFS = auto()
     READ_PESO_STAFFS = auto()
     ENABLE_DISABLE_PESO_STAFFS = auto()
+    CREATE_SCHOOLS = auto()
+    READ_SCHOOLS = auto()
+    ARCHIVE_RESTORE_SCHOOLS = auto()
 
 class AccountRole(StrEnum):
     SYSTEM_ADMIN = "SYSTEM_ADMIN"

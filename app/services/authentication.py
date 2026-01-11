@@ -26,7 +26,7 @@ class AuthenticationService:
         statement = select(Account).where(Account.email == form_data.username)
         result = await self.db.execute(statement)
         db_account = result.scalar_one_or_none()
-
+        
         if not db_account:
             raise AUTHENTICATION_INVALID_CREDENTIALS_EXCEPTION
         

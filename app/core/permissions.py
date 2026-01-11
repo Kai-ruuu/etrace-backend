@@ -16,6 +16,9 @@ class Permissions:
                     Action.CREATE_PESO_STAFFS,
                     Action.READ_PESO_STAFFS,
                     Action.ENABLE_DISABLE_PESO_STAFFS,
+                    Action.CREATE_SCHOOLS,
+                    Action.READ_SCHOOLS,
+                    Action.ARCHIVE_RESTORE_SCHOOLS,
                 })
                 
                 if self._is_default_sysad:

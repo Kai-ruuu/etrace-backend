@@ -1,6 +1,18 @@
 from fastapi import HTTPException, status
 
+ACCOUNT_ALREADY_EXISTS_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Account already exists.")
+
+ACCOUNT_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "Account not found.")
+
+ACCOUNT_ALREADY_DISABLED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Account is already disabled.")
+
+ACCOUNT_ALREADY_ENABLED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Account is already enabled.")
+
+ACCOUNT_SHOULD_NOT_BE_MODIFIED_EXCEPTION = HTTPException(status.HTTP_403_FORBIDDEN, "Account should not be modified.")
+
 ACCOUNT_CURRENTLY_DISABLED_EXCEPTION = HTTPException(status.HTTP_403_FORBIDDEN, "Account is currently disabled.")
+
+UNABLE_TO_REGISTER_ACCOUNT_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to register account.")
 
 ADMIN_ACCOUNT_EXISTS_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Account already exists.")
 
@@ -19,6 +31,16 @@ TOKEN_INVALID_CREDENTIALS_EXCEPTION = HTTPException(
 )
 
 UNAUTHORIZED_ACCESS_EXCEPION = HTTPException(status.HTTP_401_UNAUTHORIZED, "You are not authorized to access this resource.")
+
+SCHOOL_ALREADY_EXISTS_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "School already exists.")
+
+SCHOOL_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "School not found.")
+
+SCHOOL_ALREADY_ARCHIVED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "School is already archived.")
+
+SCHOOL_ALREADY_RESTORED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "School is already restored.")
+
+UNABLE_TO_CREATE_SCHOOL_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to create school.")
 
 def FILE_TYPE_NOT_SUPPORTED_EXCEPTION(file_field: str) -> None:
     raise HTTPException(
