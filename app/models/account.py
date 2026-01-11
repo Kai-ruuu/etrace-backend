@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum
 
 from app.core.database import Base
+from app.core.settings import settings
 from app.core.enums import AccountRole
 from app.utils.datetime import get_utc_now
 from app.core.permissions import Permissions
@@ -24,5 +25,9 @@ class Account(Base):
     updated_at: Mapped[datetime] = Column(DateTime(timezone=True), nullable=False, default=get_utc_now, onupdate=get_utc_now)
 
     @property
-    def permissions(self):
+    def is_default_system_admin(self) -> bool:
+        return self.email == settings.APP_DEFAULT_SYSAD_EMAIL
+    
+    @property
+    def permissions(self) -> Permissions:
         return Permissions(self)
