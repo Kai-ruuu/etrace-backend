@@ -1,0 +1,36 @@
+# virtual environment
+.venv
+
+# environment files
+*.env
+alembic.ini
+
+# project files and generated folders
+storage
+todos.txt
+notes.txt
+
+# python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# ide
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# os
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
+
+# database
+*.db
+*.sqlite
+*.sqlite3
