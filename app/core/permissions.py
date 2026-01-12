@@ -19,6 +19,9 @@ class Permissions:
                     Action.CREATE_SCHOOLS,
                     Action.READ_SCHOOLS,
                     Action.ARCHIVE_RESTORE_SCHOOLS,
+                    Action.APPROVE_COMPANIES,
+                    Action.READ_COMPANIES,
+                    Action.ENABLE_DISABLE_COMPANIES,
                 })
                 
                 if self._is_default_sysad:

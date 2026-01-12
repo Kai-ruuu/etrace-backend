@@ -4,44 +4,44 @@ from app.core.exceptions import *
 from app.core.enums import Action
 from app.core.enums import AccountRole
 from app.models.account import Account
-from app.schemas.account import SystemAdminAccountOut
+from app.schemas.account import CompanyAccountOut
 from app.repositories.account import AccountRepository
 
 
-class SystemAdminService:
+class CompanyService:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
-        self.account_repo = AccountRepository(self.db, AccountRole.SYSTEM_ADMIN)
+        self.account_repo = AccountRepository(self.db, AccountRole.COMPANY)
     
 
-    async def get_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> Account | SystemAdminAccountOut:
-        user.permissions.raise_unauthorized_if_excludes(Action.READ_SYSTEM_ADMINS)
+    async def get_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> Account | CompanyAccountOut:
+        user.permissions.raise_unauthorized_if_excludes(Action.READ_COMPANIES)
         
         db_account = await self.account_repo.get_by_id(id)
 
         if not db_account:
             raise ACCOUNT_NOT_FOUND_EXCEPTION
         
-        return SystemAdminAccountOut.model_validate(db_account) if as_pymodel else db_account
+        return CompanyAccountOut.model_validate(db_account) if as_pymodel else db_account
         
 
-    async def get_by_email(self, user: Account, email: str, as_pymodel: bool = False) -> Account | SystemAdminAccountOut:
-        user.permissions.raise_unauthorized_if_excludes(Action.READ_SYSTEM_ADMINS)
+    async def get_by_email(self, user: Account, email: str, as_pymodel: bool = False) -> Account | CompanyAccountOut:
+        user.permissions.raise_unauthorized_if_excludes(Action.READ_COMPANIES)
         
         db_account = await self.account_repo.get_by_email(email)
 
         if not db_account:
             raise ACCOUNT_NOT_FOUND_EXCEPTION
         
-        return SystemAdminAccountOut.model_validate(db_account) if as_pymodel else db_account
+        return CompanyAccountOut.model_validate(db_account) if as_pymodel else db_account
         
 
     async def search(self, user: Account, query: str, page: int = 1, page_size: int = 20) -> dict:
-        user.permissions.raise_unauthorized_if_excludes(Action.READ_SYSTEM_ADMINS)
+        user.permissions.raise_unauthorized_if_excludes(Action.READ_COMPANIES)
         
         accounts, total, total_pages = await self.account_repo.search(query, page, page_size)
 
-        items = [SystemAdminAccountOut.model_validate(account) for account in accounts]
+        items = [CompanyAccountOut.model_validate(account) for account in accounts]
 
         return {
             "items": items,
@@ -54,8 +54,8 @@ class SystemAdminService:
         }
     
 
-    async def disable_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> Account | SystemAdminAccountOut:
-        user.permissions.raise_unauthorized_if_excludes(Action.ENABLE_DISABLE_SYSTEM_ADMINS)
+    async def disable_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> Account | CompanyAccountOut:
+        user.permissions.raise_unauthorized_if_excludes(Action.ENABLE_DISABLE_COMPANIES)
 
         db_account = await self.account_repo.get_by_id(id)
 
@@ -70,12 +70,12 @@ class SystemAdminService:
         
         db_account = await self.account_repo.disable(db_account)
 
-        return SystemAdminAccountOut.model_validate(db_account) if as_pymodel else db_account
+        return CompanyAccountOut.model_validate(db_account) if as_pymodel else db_account
 
 
     
-    async def enable_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> Account | SystemAdminAccountOut:
-        user.permissions.raise_unauthorized_if_excludes(Action.ENABLE_DISABLE_SYSTEM_ADMINS)
+    async def enable_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> Account | CompanyAccountOut:
+        user.permissions.raise_unauthorized_if_excludes(Action.ENABLE_DISABLE_COMPANIES)
 
         db_account = await self.account_repo.get_by_id(id)
 
@@ -90,6 +90,6 @@ class SystemAdminService:
         
         db_account = await self.account_repo.enable(db_account)
     
-        return SystemAdminAccountOut.model_validate(db_account) if as_pymodel else db_account
+        return CompanyAccountOut.model_validate(db_account) if as_pymodel else db_account
 
 

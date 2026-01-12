@@ -10,6 +10,7 @@ class CompanyProfile(Base):
     __tablename__ = "company_profiles"
     id: Mapped[int] = Column(Integer, primary_key=True, index=True)
     name: Mapped[str] = Column(String(255), nullable=False)
+    address: Mapped[str] = Column(String(1025), nullable=False)
     logo_filename: Mapped[str] = Column(String(255), nullable=False)
     sec_filename: Mapped[str] = Column(String(255), nullable=False)
     profile_filename: Mapped[str] = Column(String(255), nullable=False)

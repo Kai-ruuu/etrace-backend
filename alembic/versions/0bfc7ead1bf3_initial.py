@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 834824da6164
+Revision ID: 0bfc7ead1bf3
 Revises: 
-Create Date: 2026-01-11 12:09:22.320986
+Create Date: 2026-01-12 18:39:53.035632
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '834824da6164'
+revision: str = '0bfc7ead1bf3'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -102,6 +102,7 @@ def upgrade() -> None:
     op.create_table('company_profiles',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
+    sa.Column('location', sa.String(length=1025), nullable=False),
     sa.Column('logo_filename', sa.String(length=255), nullable=False),
     sa.Column('sec_filename', sa.String(length=255), nullable=False),
     sa.Column('profile_filename', sa.String(length=255), nullable=False),
@@ -134,8 +135,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['account_id'], ['accounts.id'], ),
     sa.ForeignKeyConstraint(['school_id'], ['schools.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('account_id'),
-    sa.UniqueConstraint('school_id')
+    sa.UniqueConstraint('account_id')
     )
     op.create_index(op.f('ix_dean_profiles_id'), 'dean_profiles', ['id'], unique=False)
     op.create_table('graduate_records',

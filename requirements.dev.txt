@@ -11,8 +11,8 @@ PyJWT==2.10.1
 pydantic[email]
 pydantic-settings
 python-dotenv
+python-slugify
 python-multipart
 python-magic-bin
-slugify
 Pillow
 aiofiles

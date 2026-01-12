@@ -30,6 +30,13 @@ class SchoolRepository:
         return result.scalar_one_or_none()
     
 
+    async def get_all(self) -> list[School]:
+        statement = select(School)
+        result = await self.db.execute(statement)
+
+        return result.scalars().all()
+    
+
     async def search(self, query: str | None = None, page: int = 1, page_size: int = 20) -> tuple[list[School], int, int]:
         base_statement = select(School)
         count_statement = select(func.count()).select_from(School)
