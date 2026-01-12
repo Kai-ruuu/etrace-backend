@@ -13,7 +13,7 @@ class DeanProfile(Base):
     last_name: Mapped[str] = Column(String(255), nullable=False)
     account_id: Mapped[int] = Column(Integer, ForeignKey("accounts.id"), unique=True)
     account: Mapped["Account"] = relationship("Account", back_populates="dean_profile") # type: ignore
-    school_id: Mapped[int] = Column(Integer, ForeignKey("schools.id"), unique=True)
+    school_id: Mapped[int] = Column(Integer, ForeignKey("schools.id"))
     school: Mapped["School"] = relationship("School", back_populates="assigned_deans") # type: ignore
     created_at: Mapped[datetime] = Column(DateTime(timezone=True), nullable=False, default=get_utc_now)
     updated_at: Mapped[datetime] = Column(DateTime(timezone=True), nullable=False, default=get_utc_now, onupdate=get_utc_now)

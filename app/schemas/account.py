@@ -8,6 +8,7 @@ from app.schemas.company_profile import CompanyProfileOut
 from app.schemas.peso_staff_profile import PesoStaffProfileOut
 from app.schemas.system_admin_profile import SystemAdminProfileOut
 
+
 class AccountBase(BaseModel):
     email: str
     model_config = {"from_attributes": True}
@@ -23,40 +24,28 @@ class AccountOutBase(AccountBase):
 
 
 class DeanAccountOut(AccountOutBase):
-    profile: DeanProfileOut
+    dean_profile: DeanProfileOut
     model_config = {"from_attributes": True}
 
 
 class AlumniAccountOut(AccountOutBase):
-    profile: AlumniProfileOut
+    alumni_profile: AlumniProfileOut
     model_config = {"from_attributes": True}
 
 
 class CompanyAccountOut(AccountOutBase):
-    profile: CompanyProfileOut
+    company_profile: CompanyProfileOut
     model_config = {"from_attributes": True}
 
 
 class PesoStaffAccountOut(AccountOutBase):
-    profile: PesoStaffProfileOut
+    peso_staff_profile: PesoStaffProfileOut
     model_config = {"from_attributes": True}
 
 
 class SystemAdminAccountOut(AccountOutBase):
-    profile: SystemAdminProfileOut
+    system_admin_profile: SystemAdminProfileOut
     model_config = {"from_attributes": True}
-    
-    @classmethod
-    def from_account(cls, account):
-        return cls(
-            id=account.id,
-            email=account.email,
-            role=account.role,
-            is_disabled=account.is_disabled,
-            created_at=account.created_at,
-            updated_at=account.updated_at,
-            profile=account.system_admin_profile
-        )
 
 
 class AdminAccountInBase(BaseModel):

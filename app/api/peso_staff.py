@@ -2,27 +2,27 @@ from fastapi import Query, Depends, APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.account import Account
-from app.schemas.account import SystemAdminAccountIn, SystemAdminAccountOut
+from app.schemas.account import PesoStaffAccountIn, PesoStaffAccountOut
 from app.core.enums import AccountRole
 from app.core.dependencies import get_db, allow_roles
-from app.services.system_admin import SystemAdminService
+from app.services.peso_staff import PesoStaffService
 from app.services.account_provision import AccountProvisionService
 
 
-router = APIRouter(tags=["system-admin"], prefix="/api/v1/user/system-admin")
+router = APIRouter(tags=["peso-staff"], prefix="/api/v1/user/peso-staff")
 
 
-@router.post("/", response_model=SystemAdminAccountOut, tags=["system-admin: tested"])
+@router.post("/", response_model=PesoStaffAccountOut, tags=["peso-staff: tested"])
 async def create(
-    system_admin: SystemAdminAccountIn,
+    peso_staff: PesoStaffAccountIn,
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
     db: AsyncSession = Depends(get_db)
-) -> SystemAdminAccountOut:
-    service = AccountProvisionService(db, AccountRole.SYSTEM_ADMIN)
-    return await service.create_system_admin(user, system_admin, True)
+) -> PesoStaffAccountOut:
+    service = AccountProvisionService(db, AccountRole.PESO_STAFF)
+    return await service.create_peso_staff(user, peso_staff, True)
     
 
-@router.get("/search", tags=["system-admin: tested"])
+@router.get("/search", tags=["peso-staff: tested"])
 async def search(
     query: str | None = None,
     page: int = Query(1, ge=1),
@@ -30,27 +30,27 @@ async def search(
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
     db: AsyncSession = Depends(get_db)
 ) -> dict:
-    service = SystemAdminService(db)
+    service = PesoStaffService(db)
     return await service.search(user, query, page, page_size)
 
 
-@router.patch("/{id}/disable", response_model=SystemAdminAccountOut, tags=["system-admin: tested"])
+@router.patch("/{id}/disable", response_model=PesoStaffAccountOut, tags=["peso-staff: tested"])
 async def disable(
     id: int,
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
     db: AsyncSession = Depends(get_db)
-) -> SystemAdminAccountOut:
-    service = SystemAdminService(db)
+) -> PesoStaffAccountOut:
+    service = PesoStaffService(db)
     return await service.disable_by_id(user, id, True)
 
 
-@router.patch("/{id}/enable", response_model=SystemAdminAccountOut, tags=["system-admin: tested"])
+@router.patch("/{id}/enable", response_model=PesoStaffAccountOut, tags=["peso-staff: tested"])
 async def enable(
     id: int,
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
     db: AsyncSession = Depends(get_db)
-) -> SystemAdminAccountOut:
-    service = SystemAdminService(db)
+) -> PesoStaffAccountOut:
+    service = PesoStaffService(db)
     return await service.enable_by_id(user, id, True)
 
 

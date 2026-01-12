@@ -32,6 +32,8 @@ TOKEN_INVALID_CREDENTIALS_EXCEPTION = HTTPException(
 
 UNAUTHORIZED_ACCESS_EXCEPION = HTTPException(status.HTTP_401_UNAUTHORIZED, "You are not authorized to access this resource.")
 
+SCHOOLS_EMPTY_EXCEPTION = HTTPException(status.HTTP_403_FORBIDDEN, "Please create at least one school first.")
+
 SCHOOL_ALREADY_EXISTS_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "School already exists.")
 
 SCHOOL_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "School not found.")
@@ -39,6 +41,8 @@ SCHOOL_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "School no
 SCHOOL_ALREADY_ARCHIVED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "School is already archived.")
 
 SCHOOL_ALREADY_RESTORED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "School is already restored.")
+
+SCHOOL_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "School not found.")
 
 UNABLE_TO_CREATE_SCHOOL_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to create school.")
 

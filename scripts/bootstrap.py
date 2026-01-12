@@ -1,18 +1,15 @@
 import asyncio
 
-from app.core.database import engine, AsyncSessionLocal
 from app.models.all import *
 from app.services.account_provision import AccountProvisionService
-from app.repositories.system_admin_account import SystemAdminAccountRepository
-from app.repositories.system_admin_profile import SystemAdminProfileRepository
+from app.core.enums import AccountRole
+from app.core.database import engine, AsyncSessionLocal
 
 async def main():
     db = AsyncSessionLocal()
 
     try:
-        account_repo = SystemAdminAccountRepository(db)
-        profile_repo = SystemAdminProfileRepository(db)
-        admin_service = AccountProvisionService(db, account_repo, profile_repo)
+        admin_service = AccountProvisionService(db, AccountRole.SYSTEM_ADMIN)
         await admin_service.bootstap_default_system_admin()
     finally:
         await db.close()

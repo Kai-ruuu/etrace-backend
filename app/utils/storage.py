@@ -133,24 +133,24 @@ class Upload:
         self.max_filename_length = max_filename_length
 
 
-async def get_magic_mime_type(file: UploadFile) -> str:
-    content = await file.read(2048)
-    mime = magic.from_buffer(content, mime=True)
-    await file.seek(0)
-    return mime
-
-
-async def get_file_size(file: UploadFile) -> int:
-    await file.seek(0, os.SEEK_END)
-    size = await file.tell()
-    await file.seek(0)
-    return size
-
-
 class UploadManager:
     def __init__(self, *, image_resize_size: tuple[int, int] = (400, 400)):
         self.staged_files_info = {}
         self.image_resize_size = image_resize_size
+
+
+    async def get_magic_mime_type(self, file: UploadFile) -> str:
+        content = await file.read(2048)
+        mime = magic.from_buffer(content, mime=True)
+        file.file.seek(0)
+        return mime
+
+
+    async def get_file_size(self, file: UploadFile) -> int:
+        file.file.seek(0, os.SEEK_END)
+        size = file.file.tell()
+        file.file.seek(0)
+        return size
 
     
     async def rollback(self) -> None:
@@ -187,13 +187,13 @@ class UploadManager:
             raise FILE_NAME_LENGTH_TOO_LONG_EXCEPTION(upload.dest_folder.value, upload.max_filename_length)
         
         # PHASE 3: FILE SIZE check
-        file_size = await get_file_size(upload.file)
+        file_size = await self.get_file_size(upload.file)
         if file_size > upload.max_size * 1024 * 1024:
             await self.rollback()
             raise FILE_SIZE_TOO_BIG_EXCEPTION(upload.dest_folder.value, upload.max_size)
         
         # PHASE 4: FILE VALIDITY check by mime type
-        magic_mime = await get_magic_mime_type(upload.file)
+        magic_mime = await self.get_magic_mime_type(upload.file)
         
         if magic_mime not in upload.allowed_mimes:
             await self.rollback()
