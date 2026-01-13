@@ -10,7 +10,6 @@ class Course(Base):
     id: Mapped[int] = Column(Integer, primary_key=True, index=True)
     name: Mapped[str] = Column(String(255), nullable=False)
     alumni: Mapped[list["AlumniProfile"]] = relationship("AlumniProfile", back_populates="course", uselist=False) # type: ignore
-    is_inactive: Mapped[bool] = Column(Boolean, nullable=False, default=False)
     is_archived: Mapped[bool] = Column(Boolean, nullable=False, default=False)
     aligned_course_and_occupations: Mapped[list["AlignedCourseAndOccupation"]] = relationship("AlignedCourseAndOccupation", back_populates="course", uselist=True, cascade="all, delete-orphan") # type: ignore
     graduate_records: Mapped[list["GraduateRecord"]] = relationship("GraduateRecord", back_populates="course", uselist=True, cascade="all, delete-orphan") # type: ignore
