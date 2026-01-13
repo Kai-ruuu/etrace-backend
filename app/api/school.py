@@ -1,8 +1,9 @@
-from fastapi import Query, Depends, APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import Request, Query, Depends, APIRouter
 
 
 from app.models.account import Account
+from app.utils.rate_limiting import limiter
 from app.services.school import SchoolService
 from app.schemas.school import SchoolIn, SchoolOut
 from app.core.enums import AccountRole
@@ -13,7 +14,9 @@ router = APIRouter(tags=["school"], prefix="/api/v1/insti/school")
 
 
 @router.post("/", response_model=SchoolOut, tags=["school: tested"])
+@limiter.limit("10/minute")
 async def create(
+    request: Request,
     school: SchoolIn,
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
     db: AsyncSession = Depends(get_db)
@@ -23,7 +26,9 @@ async def create(
     
 
 @router.get("/search", tags=["school: tested"])
+@limiter.limit("10/minute")
 async def search(
+    request: Request,
     query: str | None = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=20, le=100),
@@ -35,7 +40,9 @@ async def search(
 
 
 @router.patch("/{id}/archive", response_model=SchoolOut, tags=["school: tested"])
+@limiter.limit("10/minute")
 async def archive(
+    request: Request,
     id: int,
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
     db: AsyncSession = Depends(get_db)
@@ -45,7 +52,9 @@ async def archive(
 
 
 @router.patch("/{id}/restore", response_model=SchoolOut, tags=["school: tested"])
+@limiter.limit("10/minute")
 async def restore(
+    request: Request,
     id: int,
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
     db: AsyncSession = Depends(get_db)

@@ -1,7 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import Query, Depends, APIRouter
+from fastapi import Request, Query, Depends, APIRouter
 
 from app.models.account import Account
+from app.utils.rate_limiting import limiter
 from app.schemas.account import CompanyAccountOut
 from app.core.enums import AccountRole
 from app.core.dependencies import get_db, allow_roles
@@ -12,7 +13,9 @@ router = APIRouter(tags=["company"], prefix="/api/v1/user/company")
    
 
 @router.get("/search", tags=["company: tested"])
+@limiter.limit("10/minute")
 async def search(
+    request: Request,
     query: str | None = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=20, le=100),
@@ -24,7 +27,9 @@ async def search(
 
 
 @router.patch("/{id}/disable", response_model=CompanyAccountOut, tags=["company: tested"])
+@limiter.limit("10/minute")
 async def disable(
+    request: Request,
     id: int,
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
     db: AsyncSession = Depends(get_db)
@@ -34,7 +39,9 @@ async def disable(
 
 
 @router.patch("/{id}/enable", response_model=CompanyAccountOut, tags=["company: tested"])
+@limiter.limit("10/minute")
 async def enable(
+    request: Request,
     id: int,
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
     db: AsyncSession = Depends(get_db)
