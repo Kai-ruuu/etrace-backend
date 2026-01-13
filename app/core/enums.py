@@ -16,6 +16,9 @@ class Action(StrEnum):
     CREATE_SCHOOLS = auto()
     READ_SCHOOLS = auto()
     ARCHIVE_RESTORE_SCHOOLS = auto()
+    CREATE_COURSES = auto()
+    READ_COURSES = auto()
+    ARCHIVE_RESTORE_COURSES = auto()
 
 class AccountRole(StrEnum):
     SYSTEM_ADMIN = "SYSTEM_ADMIN"

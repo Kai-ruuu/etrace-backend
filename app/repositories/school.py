@@ -1,5 +1,5 @@
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_, func, literal
 
 from app.models.school import School
 

@@ -22,6 +22,8 @@ class Permissions:
                     Action.APPROVE_COMPANIES,
                     Action.READ_COMPANIES,
                     Action.ENABLE_DISABLE_COMPANIES,
+                    # [mark] review if appropriate
+                    Action.READ_COURSES,
                 })
                 
                 if self._is_default_sysad:
@@ -30,6 +32,12 @@ class Permissions:
                         Action.READ_SYSTEM_ADMINS,
                         Action.ENABLE_DISABLE_SYSTEM_ADMINS
                     })
+            case AccountRole.DEAN:
+                self.actions.update({
+                    Action.CREATE_COURSES,
+                    Action.READ_COURSES,
+                    Action.ARCHIVE_RESTORE_COURSES,
+                })
     
     def can(self, action: Action) -> bool:
         return action in self.actions
