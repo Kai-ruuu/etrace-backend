@@ -20,6 +20,8 @@ class Permissions:
                     Action.READ_SCHOOLS,
                     Action.ARCHIVE_RESTORE_SCHOOLS,
                     Action.APPROVE_COMPANIES,
+                    Action.REJECT_COMPANIES,
+                    Action.PEND_COMPANIES,
                     Action.READ_COMPANIES,
                     Action.ENABLE_DISABLE_COMPANIES,
                     # [mark] review if appropriate
@@ -38,6 +40,13 @@ class Permissions:
                     Action.READ_COURSES,
                     Action.ARCHIVE_RESTORE_COURSES,
                 })
+            case AccountRole.PESO_STAFF:
+                self.actions.update({
+                    Action.APPROVE_COMPANIES,
+                    Action.REJECT_COMPANIES,
+                    Action.PEND_COMPANIES,
+                })
+
     
     def can(self, action: Action) -> bool:
         return action in self.actions

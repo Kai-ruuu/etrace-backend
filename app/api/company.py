@@ -50,3 +50,39 @@ async def enable(
     return await service.enable_by_id(user, id, True)
 
 
+@router.patch("/{id}/approve", response_model=CompanyAccountOut, tags=["company: tested"])
+@limiter.limit("10/minute")
+async def approve(
+    request: Request,
+    id: int,
+    user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN, AccountRole.PESO_STAFF])),
+    db: AsyncSession = Depends(get_db)
+) -> CompanyAccountOut:
+    service = CompanyService(db)
+    return await service.approve_by_id(user, id, True)
+
+
+@router.patch("/{id}/reject", response_model=CompanyAccountOut, tags=["company: tested"])
+@limiter.limit("10/minute")
+async def reject(
+    request: Request,
+    id: int,
+    user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN, AccountRole.PESO_STAFF])),
+    db: AsyncSession = Depends(get_db)
+) -> CompanyAccountOut:
+    service = CompanyService(db)
+    return await service.reject_by_id(user, id, True)
+
+
+@router.patch("/{id}/pend", response_model=CompanyAccountOut, tags=["company: tested"])
+@limiter.limit("10/minute")
+async def pend(
+    request: Request,
+    id: int,
+    user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN, AccountRole.PESO_STAFF])),
+    db: AsyncSession = Depends(get_db)
+) -> CompanyAccountOut:
+    service = CompanyService(db)
+    return await service.pend_by_id(user, id, True)
+
+

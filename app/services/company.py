@@ -1,17 +1,18 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import *
-from app.core.enums import Action
-from app.core.enums import AccountRole
 from app.models.account import Account
 from app.schemas.account import CompanyAccountOut
 from app.repositories.account import AccountRepository
+from app.repositories.profile import ProfileRepository
+from app.core.exceptions import *
+from app.core.enums import AccountRole, Action, CompanyApprovalStatus
 
 
 class CompanyService:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
         self.account_repo = AccountRepository(self.db, AccountRole.COMPANY)
+        self.profile_repo = ProfileRepository(self.db, AccountRole.COMPANY)
     
 
     async def get_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> Account | CompanyAccountOut:
@@ -90,6 +91,78 @@ class CompanyService:
         
         db_account = await self.account_repo.enable(db_account)
     
+        return CompanyAccountOut.model_validate(db_account) if as_pymodel else db_account
+
+
+    async def approve_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> Account | CompanyAccountOut:
+        user.permissions.raise_unauthorized_if_excludes(Action.APPROVE_COMPANIES)
+
+        db_account = await self.account_repo.get_by_id(id)
+
+        if not db_account:
+            raise ACCOUNT_NOT_FOUND_EXCEPTION
+        
+        if user.role == AccountRole.SYSTEM_ADMIN:
+            if db_account.company_profile.sysad_approval_status == CompanyApprovalStatus.APPROVED:
+                raise COMPANY_ALREADY_APPROVED_EXCEPTION
+
+            await self.profile_repo.approve_company_as_system_admin_by_account_id(id, False)
+        else:
+            if db_account.company_profile.peso_staff_approval_status == CompanyApprovalStatus.APPROVED:
+                raise COMPANY_ALREADY_APPROVED_EXCEPTION
+
+            await self.profile_repo.approve_company_as_peso_staff_by_account_id(id, False)
+        
+        db_account = await self.account_repo.get_by_id(id)
+
+        return CompanyAccountOut.model_validate(db_account) if as_pymodel else db_account
+
+
+    async def reject_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> Account | CompanyAccountOut:
+        user.permissions.raise_unauthorized_if_excludes(Action.REJECT_COMPANIES)
+
+        db_account = await self.account_repo.get_by_id(id)
+
+        if not db_account:
+            raise ACCOUNT_NOT_FOUND_EXCEPTION
+        
+        if user.role == AccountRole.SYSTEM_ADMIN:
+            if db_account.company_profile.sysad_approval_status == CompanyApprovalStatus.REJECTED:
+                raise COMPANY_ALREADY_REJECTED_EXCEPTION
+
+            await self.profile_repo.reject_company_as_system_admin_by_account_id(id, False)
+        else:
+            if db_account.company_profile.peso_staff_approval_status == CompanyApprovalStatus.REJECTED:
+                raise COMPANY_ALREADY_REJECTED_EXCEPTION
+            
+            await self.profile_repo.reject_company_as_peso_staff_by_account_id(id, False)
+        
+        db_account = await self.account_repo.get_by_id(id)
+
+        return CompanyAccountOut.model_validate(db_account) if as_pymodel else db_account
+
+
+    async def pend_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> Account | CompanyAccountOut:
+        user.permissions.raise_unauthorized_if_excludes(Action.PEND_COMPANIES)
+
+        db_account = await self.account_repo.get_by_id(id)
+
+        if not db_account:
+            raise ACCOUNT_NOT_FOUND_EXCEPTION
+        
+        if user.role == AccountRole.SYSTEM_ADMIN:
+            if db_account.company_profile.sysad_approval_status == CompanyApprovalStatus.PENDING:
+                raise COMPANY_ALREADY_PENDING_EXCEPTION
+
+            await self.profile_repo.pend_company_as_system_admin_by_account_id(id, False)
+        else:
+            if db_account.company_profile.peso_staff_approval_status == CompanyApprovalStatus.PENDING:
+                raise COMPANY_ALREADY_PENDING_EXCEPTION
+            
+            await self.profile_repo.pend_company_as_peso_staff_by_account_id(id, False)
+        
+        db_account = await self.account_repo.get_by_id(id)
+
         return CompanyAccountOut.model_validate(db_account) if as_pymodel else db_account
 
 

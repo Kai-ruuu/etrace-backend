@@ -4,11 +4,11 @@ ACCOUNT_ALREADY_EXISTS_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Acco
 
 ACCOUNT_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "Account not found.")
 
-ACCOUNT_ALREADY_DISABLED_EXCEPTION = HTTPException(status.HTTP_304_NOT_MODIFIED, "Account is already disabled.")
+ACCOUNT_ALREADY_DISABLED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Account is already disabled.")
 
-ACCOUNT_ALREADY_ENABLED_EXCEPTION = HTTPException(status.HTTP_304_NOT_MODIFIED, "Account is already enabled.")
+ACCOUNT_ALREADY_ENABLED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Account is already enabled.")
 
-ACCOUNT_SHOULD_NOT_BE_MODIFIED_EXCEPTION = HTTPException(status.HTTP_304_NOT_MODIFIED, "Account should not be modified.")
+ACCOUNT_SHOULD_NOT_BE_MODIFIED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Account should not be modified.")
 
 ACCOUNT_CURRENTLY_DISABLED_EXCEPTION = HTTPException(status.HTTP_403_FORBIDDEN, "Account is currently disabled.")
 
@@ -24,6 +24,12 @@ AUTHENTICATION_INVALID_CREDENTIALS_EXCEPTION = HTTPException(
 
 PROFILE_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "Profile not found.")
 
+COMPANY_ALREADY_APPROVED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Company is already approved.")
+
+COMPANY_ALREADY_PENDING_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Company is already pending for approval.")
+
+COMPANY_ALREADY_REJECTED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Company is already rejected.")
+
 TOKEN_INVALID_CREDENTIALS_EXCEPTION = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail="Could not validate credentials.",
@@ -38,9 +44,9 @@ SCHOOL_ALREADY_EXISTS_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Schoo
 
 SCHOOL_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "School not found.")
 
-SCHOOL_ALREADY_ARCHIVED_EXCEPTION = HTTPException(status.HTTP_304_NOT_MODIFIED, "School is already archived.")
+SCHOOL_ALREADY_ARCHIVED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "School is already archived.")
 
-SCHOOL_ALREADY_RESTORED_EXCEPTION = HTTPException(status.HTTP_304_NOT_MODIFIED, "School is already restored.")
+SCHOOL_ALREADY_RESTORED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "School is already restored.")
 
 SCHOOL_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "School not found.")
 
@@ -50,9 +56,9 @@ COURSE_ALREADY_EXISTS_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Cours
 
 COURSE_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "Course not found.")
 
-COURSE_ALREADY_ARCHIVED_EXCEPTION = HTTPException(status.HTTP_304_NOT_MODIFIED, "Course is already archived.")
+COURSE_ALREADY_ARCHIVED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Course is already archived.")
 
-COURSE_ALREADY_RESTORED_EXCEPTION = HTTPException(status.HTTP_304_NOT_MODIFIED, "Course is already restored.")
+COURSE_ALREADY_RESTORED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Course is already restored.")
 
 UNABLE_TO_CREATE_COURSE_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to create course.")
 
