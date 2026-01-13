@@ -8,6 +8,8 @@ class Action(StrEnum):
     READ_DEANS = auto()
     ENABLE_DISABLE_DEANS = auto()
     APPROVE_COMPANIES = auto()
+    REJECT_COMPANIES = auto()
+    PEND_COMPANIES = auto()
     READ_COMPANIES = auto()
     ENABLE_DISABLE_COMPANIES = auto()
     CREATE_PESO_STAFFS = auto()

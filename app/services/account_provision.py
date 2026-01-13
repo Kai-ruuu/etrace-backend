@@ -130,8 +130,12 @@ class AccountProvisionService:
 
             if db_account:
                 raise ACCOUNT_ALREADY_EXISTS_EXCEPTION
+
+            # [mark] refactor after the maling service has been implemented
+            plain_password = generate_password()
+            Logger.info(f"Peso Staff creds:\nEmail: {peso_staff.email}\nPassword: {plain_password}")
             
-            hashed_password = hash_password(generate_password())
+            hashed_password = hash_password(plain_password)
 
             account = await self.account_repo.create(Account(
                 email=peso_staff.email,
