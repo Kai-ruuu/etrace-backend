@@ -7,13 +7,12 @@ from app.core.exceptions import *
 from app.core.enums import Action
 from app.models.school import School
 from app.models.account import Account
-from app.models.system_admin_profile import SystemAdminProfile
 
 
 class SchoolService:
-    def __init__(self, db: AsyncSession, repo: SchoolRepository) -> None:
+    def __init__(self, db: AsyncSession) -> None:
         self.db = db
-        self.repo = repo
+        self.repo = SchoolRepository(self.db)
 
 
     async def create(self, user: Account, school: SchoolIn, as_pymodel: bool = False) -> School | SchoolOut:

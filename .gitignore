@@ -9,6 +9,7 @@ alembic.ini
 storage
 todos.txt
 notes.txt
+dummy_creds.txt
 
 # python
 __pycache__/

@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.account import Account
 from app.services.school import SchoolService
 from app.schemas.school import SchoolIn, SchoolOut
-from app.repositories.school import SchoolRepository
 from app.core.enums import AccountRole
 from app.core.dependencies import get_db, allow_roles
 
@@ -19,8 +18,7 @@ async def create(
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
     db: AsyncSession = Depends(get_db)
 ) -> SchoolOut:
-    repo = SchoolRepository(db)
-    service = SchoolService(db, repo)
+    service = SchoolService(db)
     return await service.create(user, school, True)
     
 
@@ -32,8 +30,7 @@ async def search(
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
     db: AsyncSession = Depends(get_db)
 ) -> dict:
-    repo = SchoolRepository(db)
-    service = SchoolService(db, repo)
+    service = SchoolService(db)
     return await service.search(user, query, page, page_size)
 
 
@@ -43,8 +40,7 @@ async def archive(
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
     db: AsyncSession = Depends(get_db)
 ) -> SchoolOut:
-    repo = SchoolRepository(db)
-    service = SchoolService(db, repo)
+    service = SchoolService(db)
     return await service.archive_by_id(user, id, True)
 
 
@@ -54,8 +50,7 @@ async def restore(
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
     db: AsyncSession = Depends(get_db)
 ) -> SchoolOut:
-    repo = SchoolRepository(db)
-    service = SchoolService(db, repo)
+    service = SchoolService(db)
     return await service.restore_by_id(user, id, True)
 
 

@@ -4,11 +4,11 @@ ACCOUNT_ALREADY_EXISTS_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Acco
 
 ACCOUNT_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "Account not found.")
 
-ACCOUNT_ALREADY_DISABLED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Account is already disabled.")
+ACCOUNT_ALREADY_DISABLED_EXCEPTION = HTTPException(status.HTTP_304_NOT_MODIFIED, "Account is already disabled.")
 
-ACCOUNT_ALREADY_ENABLED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Account is already enabled.")
+ACCOUNT_ALREADY_ENABLED_EXCEPTION = HTTPException(status.HTTP_304_NOT_MODIFIED, "Account is already enabled.")
 
-ACCOUNT_SHOULD_NOT_BE_MODIFIED_EXCEPTION = HTTPException(status.HTTP_403_FORBIDDEN, "Account should not be modified.")
+ACCOUNT_SHOULD_NOT_BE_MODIFIED_EXCEPTION = HTTPException(status.HTTP_304_NOT_MODIFIED, "Account should not be modified.")
 
 ACCOUNT_CURRENTLY_DISABLED_EXCEPTION = HTTPException(status.HTTP_403_FORBIDDEN, "Account is currently disabled.")
 
@@ -38,13 +38,23 @@ SCHOOL_ALREADY_EXISTS_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Schoo
 
 SCHOOL_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "School not found.")
 
-SCHOOL_ALREADY_ARCHIVED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "School is already archived.")
+SCHOOL_ALREADY_ARCHIVED_EXCEPTION = HTTPException(status.HTTP_304_NOT_MODIFIED, "School is already archived.")
 
-SCHOOL_ALREADY_RESTORED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "School is already restored.")
+SCHOOL_ALREADY_RESTORED_EXCEPTION = HTTPException(status.HTTP_304_NOT_MODIFIED, "School is already restored.")
 
 SCHOOL_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "School not found.")
 
 UNABLE_TO_CREATE_SCHOOL_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to create school.")
+
+COURSE_ALREADY_EXISTS_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Course already exists.")
+
+COURSE_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "Course not found.")
+
+COURSE_ALREADY_ARCHIVED_EXCEPTION = HTTPException(status.HTTP_304_NOT_MODIFIED, "Course is already archived.")
+
+COURSE_ALREADY_RESTORED_EXCEPTION = HTTPException(status.HTTP_304_NOT_MODIFIED, "Course is already restored.")
+
+UNABLE_TO_CREATE_COURSE_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to create course.")
 
 def FILE_TYPE_NOT_SUPPORTED_EXCEPTION(file_field: str) -> None:
     raise HTTPException(

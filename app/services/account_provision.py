@@ -186,7 +186,11 @@ class AccountProvisionService:
             if db_account:
                 raise ACCOUNT_ALREADY_EXISTS_EXCEPTION
             
-            hashed_password = hash_password(generate_password())
+            # [mark] refactor after the maling service has been implemented
+            plain_password = generate_password()
+            Logger.info(f"Dean creds:\nEmail: {dean.email}\nPassword: {plain_password}")
+            
+            hashed_password = hash_password(plain_password)
 
             account = await self.account_repo.create(Account(
                 email=dean.email,
@@ -293,3 +297,5 @@ class AccountProvisionService:
             await self.db.rollback()
             Logger.error(f"Unable to create Company's account and profile - {repr(e)}")
             raise UNABLE_TO_REGISTER_ACCOUNT_EXCEPTION
+
+
