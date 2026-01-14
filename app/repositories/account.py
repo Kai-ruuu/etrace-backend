@@ -42,7 +42,7 @@ class AccountRepository:
             case AccountRole.ALUMNI:
                 return or_(
                     Account.email.ilike(f"%{query}%"),
-                    func.coalesce(self.AccountProfileModel.prefix, literal("")).ilike(f"%{query}%"),
+                    func.coalesce(self.AccountProfileModel.name_extension, literal("")).ilike(f"%{query}%"),
                     self.AccountProfileModel.first_name.ilike(f"%{query}%"),
                     func.coalesce(self.AccountProfileModel.middle_name, literal("")).ilike(f"%{query}%"),
                     self.AccountProfileModel.last_name.ilike(f"%{query}%"),

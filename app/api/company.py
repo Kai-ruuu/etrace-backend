@@ -19,7 +19,7 @@ async def search(
     query: str | None = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=20, le=100),
-    user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
+    user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN, AccountRole.PESO_STAFF])),
     db: AsyncSession = Depends(get_db)
 ) -> dict:
     service = CompanyService(db)
@@ -31,7 +31,7 @@ async def search(
 async def disable(
     request: Request,
     id: int,
-    user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
+    user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN, AccountRole.PESO_STAFF])),
     db: AsyncSession = Depends(get_db)
 ) -> CompanyAccountOut:
     service = CompanyService(db)
@@ -43,7 +43,7 @@ async def disable(
 async def enable(
     request: Request,
     id: int,
-    user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
+    user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN, AccountRole.PESO_STAFF])),
     db: AsyncSession = Depends(get_db)
 ) -> CompanyAccountOut:
     service = CompanyService(db)

@@ -42,9 +42,12 @@ class Permissions:
                 })
             case AccountRole.PESO_STAFF:
                 self.actions.update({
+                    Action.READ_COMPANIES,
                     Action.APPROVE_COMPANIES,
                     Action.REJECT_COMPANIES,
                     Action.PEND_COMPANIES,
+                    # [mark] review if appropriate
+                    Action.ENABLE_DISABLE_COMPANIES,
                 })
 
     

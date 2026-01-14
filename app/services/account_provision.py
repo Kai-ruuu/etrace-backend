@@ -1,18 +1,26 @@
+from json import loads, JSONDecodeError
 from fastapi import UploadFile, Form, File
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.account import *
-from app.core.exceptions import *
-from app.core.settings import settings
-from app.core.enums import Action, AccountRole
+from app.repositories.social import SocialRepository
 from app.repositories.school import SchoolRepository
 from app.repositories.account import AccountRepository
 from app.repositories.profile import ProfileRepository
+from app.repositories.occupation import OccupationRepository
+from app.repositories.occupation_state import OccupationStateRepository
 from app.utils.logging import Logger
 from app.utils.storage import Upload, UploadManager, DestFolder
 from app.utils.password import hash_password, generate_password
+from app.core.exceptions import *
+from app.core.settings import settings
+from app.core.enums import Action, AccountRole, AlumniEmploymentStatus
+from app.models.social import Social
 from app.models.account import Account
+from app.models.occupation_state import OccupationState
 from app.models.dean_profile import DeanProfile
+from app.models.alumni_profile import AlumniProfile
 from app.models.company_profile import CompanyProfile
 from app.models.peso_staff_profile import PesoStaffProfile
 from app.models.system_admin_profile import SystemAdminProfile
@@ -30,21 +38,18 @@ class AccountProvisionService:
                 self.school_repo = SchoolRepository(self.db)
             case AccountRole.ALUMNI:
                 self.upload_manager = UploadManager()
+                self.social_repo = SocialRepository(self.db)
+                self.occupation_repo = OccupationRepository(self.db)
+                self.occupation_state_repo = OccupationStateRepository(self.db)
             case AccountRole.COMPANY:
                 self.upload_manager = UploadManager()
 
     
-    async def bootstap_default_system_admin(self) -> None:
+    async def bootstap_default_system_admin(self) -> Account:
         if self.role != AccountRole.SYSTEM_ADMIN:
             raise ValueError("Service role must be AccountRole.SYSTEM_ADMIN in order to bootstrap.")
         
         try:
-            db_account = await self.account_repo.get_by_email(settings.APP_DEFAULT_SYSAD_EMAIL)
-            
-            if db_account:
-                Logger.info("Default System Administrator's account and profile already exists.")
-                return
-            
             hashed_password = hash_password(settings.APP_DEFAULT_SYSAD_PASS)
 
             account = await self.account_repo.create(Account(
@@ -60,13 +65,19 @@ class AccountProvisionService:
             ))
             
             await self.db.commit()
-            
             Logger.success("Default System Administrator's account and profile has been created.")
+            return account
+        except IntegrityError as e:
+            Logger.error(f"Unable to create Default System Administrator's account and profile - {repr(e)}")
             
-        except:
-            await self.db.rollback()
-            Logger.error("Unable to create Default System Administrator's account and profile.")
-            raise
+            match e.orig.args[0]:
+                case 1062:
+                    raise ACCOUNT_ALREADY_EXISTS_EXCEPTION
+                case _:
+                    raise UNABLE_TO_REGISTER_ACCOUNT_EXCEPTION
+        except Exception as e:
+            Logger.error(f"Unable to create Default System Administrator's account and profile - {repr(e)}.")
+            raise e
     
     
     async def create_system_admin(
@@ -81,11 +92,6 @@ class AccountProvisionService:
         user.permissions.raise_unauthorized_if_excludes(Action.CREATE_SYSTEM_ADMINS)
         
         try:
-            db_account = await self.account_repo.get_by_email(system_admin.email)
-
-            if db_account:
-                raise ACCOUNT_ALREADY_EXISTS_EXCEPTION
-            
             hashed_password = hash_password(generate_password())
 
             account = await self.account_repo.create(Account(
@@ -102,14 +108,20 @@ class AccountProvisionService:
             ))
             
             await self.db.commit()
-
-            account = await self.account_repo.get_by_email(system_admin.email)
+            await self.db.refresh(account, attribute_names=["system_admin_profile"])
             
             return SystemAdminAccountOut.model_validate(account) if as_pymodel else (account, profile)
-        except HTTPException:
-            raise
+        except HTTPException as e:
+            raise e
+        except IntegrityError as e:
+            Logger.error(f"Unable to create System Administrator's account and profile - {repr(e)}")
+            
+            match e.orig.args[0]:
+                case 1062:
+                    raise ACCOUNT_ALREADY_EXISTS_EXCEPTION
+                case _:
+                    raise UNABLE_TO_REGISTER_ACCOUNT_EXCEPTION
         except Exception as e:
-            await self.db.rollback()
             Logger.error(f"Unable to create System Administrator's account and profile - {repr(e)}")
             raise UNABLE_TO_REGISTER_ACCOUNT_EXCEPTION
     
@@ -118,7 +130,8 @@ class AccountProvisionService:
         self,
         user: Account,
         peso_staff: PesoStaffAccountIn,
-        as_pymodel: bool = False
+        as_pymodel: bool = False,
+        dev_setup_password: str | None = None
     ) -> tuple[Account, PesoStaffProfile] | PesoStaffAccountOut:
         if self.role != AccountRole.PESO_STAFF:
             raise ValueError("Service role must be AccountRole.PESO_STAFF in order to create a PESO Staff.")
@@ -131,10 +144,7 @@ class AccountProvisionService:
             if db_account:
                 raise ACCOUNT_ALREADY_EXISTS_EXCEPTION
 
-            # [mark] refactor after the maling service has been implemented
-            plain_password = generate_password()
-            Logger.info(f"Peso Staff creds:\nEmail: {peso_staff.email}\nPassword: {plain_password}")
-            
+            plain_password = dev_setup_password or generate_password()
             hashed_password = hash_password(plain_password)
 
             account = await self.account_repo.create(Account(
@@ -151,14 +161,20 @@ class AccountProvisionService:
             ))
             
             await self.db.commit()
-            
-            account = await self.account_repo.get_by_email(peso_staff.email)
+            await self.db.refresh(account, attribute_names=["peso_staff_profile"])
             
             return PesoStaffAccountOut.model_validate(account) if as_pymodel else (account, profile)
-        except HTTPException:
-            raise
+        except HTTPException as e:
+            raise e
+        except IntegrityError as e:
+            Logger.error(f"Unable to create PESO Staff's account and profile - {repr(e)}")
+            
+            match e.orig.args[0]:
+                case 1062:
+                    raise ACCOUNT_ALREADY_EXISTS_EXCEPTION
+                case _:
+                    raise UNABLE_TO_REGISTER_ACCOUNT_EXCEPTION
         except Exception as e:
-            await self.db.rollback()
             Logger.error(f"Unable to create PESO Staff's account and profile - {repr(e)}")
             raise UNABLE_TO_REGISTER_ACCOUNT_EXCEPTION
 
@@ -167,7 +183,8 @@ class AccountProvisionService:
         self,
         user: Account,
         dean: DeanAccountIn,
-        as_pymodel: bool = False
+        as_pymodel: bool = False,
+        dev_setup_password: str | None = None
     ) -> tuple[Account, DeanProfile] | DeanAccountOut:
         if self.role != AccountRole.DEAN:
             raise ValueError("Service role must be AccountRole.DEAN in order to create a Dean.")
@@ -190,10 +207,7 @@ class AccountProvisionService:
             if db_account:
                 raise ACCOUNT_ALREADY_EXISTS_EXCEPTION
             
-            # [mark] refactor after the maling service has been implemented
-            plain_password = generate_password()
-            Logger.info(f"Dean creds:\nEmail: {dean.email}\nPassword: {plain_password}")
-            
+            plain_password = dev_setup_password or generate_password()
             hashed_password = hash_password(plain_password)
 
             account = await self.account_repo.create(Account(
@@ -211,38 +225,46 @@ class AccountProvisionService:
             ))
             
             await self.db.commit()
-
-            account = await self.account_repo.get_by_email(dean.email)
+            await self.db.refresh(account, attribute_names=["dean_profile"])
             
             return DeanAccountOut.model_validate(account) if as_pymodel else (account, profile)
-        except HTTPException:
-            raise
+        except HTTPException as e:
+            raise e
+        except IntegrityError as e:
+            Logger.error(f"Unable to create Dean's account and profile - {repr(e)}")
+            
+            match e.orig.args[0]:
+                case 1062:
+                    raise ACCOUNT_ALREADY_EXISTS_EXCEPTION
+                case _:
+                    raise UNABLE_TO_REGISTER_ACCOUNT_EXCEPTION
         except Exception as e:
-            await self.db.rollback()
             Logger.error(f"Unable to create Dean's account and profile - {repr(e)}")
             raise UNABLE_TO_REGISTER_ACCOUNT_EXCEPTION
 
 
     async def create_company(
         self,
-        email: str=Form(...), 
-        password: str=Form(...),
-        name: str=Form(...),
-        address: str=Form(...),
-        logo_file: UploadFile | None=File(None),
-        sec_file: UploadFile | None=File(None),
-        profile_file: UploadFile | None=File(None),
-        business_permit_file: UploadFile | None=File(None),
-        list_of_vacancies_file: UploadFile | None=File(None),
-        cert_from_dole_file: UploadFile | None=File(None),
-        cert_of_no_pending_case_file: UploadFile | None=File(None),
-        reg_dti_cda_file: UploadFile | None=File(None),
-        reg_of_est_file: UploadFile | None=File(None),
-        reg_philjobnet_file: UploadFile | None=File(None),
+        email: str = Form(...), 
+        password: str = Form(...),
+        name: str = Form(...),
+        address: str = Form(...),
+        logo_file: UploadFile | None = File(None),
+        sec_file: UploadFile | None = File(None),
+        profile_file: UploadFile | None = File(None),
+        business_permit_file: UploadFile | None = File(None),
+        list_of_vacancies_file: UploadFile | None = File(None),
+        cert_from_dole_file: UploadFile | None = File(None),
+        cert_of_no_pending_case_file: UploadFile | None = File(None),
+        reg_dti_cda_file: UploadFile | None = File(None),
+        reg_of_est_file: UploadFile | None = File(None),
+        reg_philjobnet_file: UploadFile | None = File(None),
         as_pymodel: bool = False
     ) -> tuple[Account, CompanyProfile] | CompanyAccountOut:
         if self.role != AccountRole.COMPANY:
             raise ValueError("Service role must be AccountRole.COMPANY in order to create a company.")
+        
+        # [mark] add email validation logic here later
         
         await self.upload_manager.stage_uploads([
             Upload(file=logo_file, dest_folder=DestFolder.LOGO, allowed_mimes={"image/png", "image/jpg", "image/jpeg"}),
@@ -288,18 +310,126 @@ class AccountProvisionService:
             ))
             
             await self.db.commit()
+            await self.db.refresh(account, attribute_names=["company_profile"])
             await self.upload_manager.commit()
 
-            account = await self.account_repo.get_by_email(email)
-            
             return CompanyAccountOut.model_validate(account) if as_pymodel else (account, profile)
-        except HTTPException:
-            self.upload_manager.rollback()
-            raise
+        except HTTPException as e:
+            raise e
+        except IntegrityError as e:
+            Logger.error(f"Unable to create Company's account and profile - {repr(e)}")
+            
+            match e.orig.args[0]:
+                case 1062:
+                    raise ACCOUNT_ALREADY_EXISTS_EXCEPTION
+                case _:
+                    raise UNABLE_TO_REGISTER_ACCOUNT_EXCEPTION
         except Exception as e:
-            self.upload_manager.rollback()
             await self.db.rollback()
             Logger.error(f"Unable to create Company's account and profile - {repr(e)}")
             raise UNABLE_TO_REGISTER_ACCOUNT_EXCEPTION
 
 
+    async def create_alumni(
+        self,
+        email: str = Form(...), 
+        password: str = Form(...),
+        name_extension: str | None = Form(None),
+        first_name: str = Form(...),
+        middle_name: str | None = Form(None),
+        last_name: str = Form(...),
+        address: str = Form(...),
+        phone_number: str = Form(...),
+        course_id: int = Form(...),
+        year_graduated: int = Form(...),
+        employment_status: AlumniEmploymentStatus = Form(AlumniEmploymentStatus.UNEMPLOYED),
+        occupations: str = Form(...),
+        socials: str = Form(...),
+        profile_picture_file: UploadFile | None = File(None),
+        curriculum_vitae_file: UploadFile | None = File(None),
+        as_pymodel: bool = False
+    ) -> tuple[Account, AlumniProfile] | AlumniAccountOut:
+        if self.role != AccountRole.ALUMNI:
+            raise ValueError("Service role must be AccountRole.ALUMNI in order to create an Alumni.")
+
+        # [mark] add email validation logic here later
+        
+        await self.upload_manager.stage_uploads([
+            Upload(file=profile_picture_file, dest_folder=DestFolder.PROFILE_PICTURE, allowed_mimes={"image/png", "image/jpg", "image/jpeg"}),
+            Upload(file=curriculum_vitae_file, dest_folder=DestFolder.CURRICULUM_VITAE, allowed_mimes={"application/pdf"})
+        ])
+        
+        try:
+            account = await self.account_repo.create(Account(
+                email=email,
+                password=hash_password(password),
+                role=AccountRole.ALUMNI,
+            ))
+            
+            profile = await self.profile_repo.create(AlumniProfile(
+                account_id=account.id,
+                name_extension=name_extension,
+                first_name=first_name,
+                middle_name=middle_name,
+                last_name=last_name,
+                address=address,
+                year_graduated=year_graduated,
+                phone_number=phone_number,
+                employment_status=employment_status,
+                course_id=course_id,
+                profile_picture_filename=self.upload_manager.get_staged_file_name(DestFolder.PROFILE_PICTURE),
+                curriculum_vitae_filename=self.upload_manager.get_staged_file_name(DestFolder.CURRICULUM_VITAE),
+            ))
+
+            try:
+                occupations_list = loads(occupations)
+            except JSONDecodeError:
+                occupations_list = []
+            
+            for occupation_info in occupations_list:
+                title = occupation_info.get("title")
+                location = occupation_info.get("location")
+                is_current = occupation_info.get("is_current")
+                occupation = await self.occupation_repo.get_or_create_by_title(title)
+
+                await self.occupation_state_repo.create(OccupationState(
+                    alumni_id=profile.id,
+                    occupation_id=occupation.id,
+                    location=location,
+                    is_current=is_current
+                ))
+            
+            try:
+                socials_list = loads(socials)
+            except JSONDecodeError:
+                socials_list = []
+            
+            for social_info in socials_list:
+                platform = social_info.get("platform")
+                url = social_info.get("url")
+
+                await self.social_repo.create(Social(
+                    alumni_profile_id=profile.id,
+                    platform=platform,
+                    url=url,
+                ))
+            
+            await self.db.commit()
+            await self.db.refresh(account, attribute_names=["alumni_profile"])
+            await self.upload_manager.commit()
+
+            return AlumniAccountOut.model_validate(account) if as_pymodel else (account, profile)
+        except IntegrityError as e:
+            await self.upload_manager.rollback()
+            Logger.error(f"Unable to create Alumni's account and profile - {repr(e)}")
+            
+            match e.orig.args[0]:
+                case 1062:
+                    raise ACCOUNT_ALREADY_EXISTS_EXCEPTION
+                case _:
+                    raise UNABLE_TO_REGISTER_ACCOUNT_EXCEPTION
+        except Exception as e:
+            await self.upload_manager.rollback()
+            Logger.error(f"Unable to create Alumni's account and profile - {repr(e)}")
+            raise UNABLE_TO_REGISTER_ACCOUNT_EXCEPTION
+    

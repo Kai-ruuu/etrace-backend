@@ -9,11 +9,11 @@ class Logger:
 
     @classmethod
     def success(cls, message: str) -> None:
-        print(Fore.GREEN + "SUCCESS:\t  " + message)
+        print(Fore.GREEN + "SUCCESS:  " + message)
 
     @classmethod
     def warn(cls, message: str) -> None:
-        print(Fore.YELLOW + "WARNING:\t  " + message)
+        print(Fore.YELLOW + "WARNING:  " + message)
 
     @classmethod
     def error(cls, message: str) -> None:

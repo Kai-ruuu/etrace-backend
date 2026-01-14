@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 from app.core.enums import AccountRole
 from app.schemas.dean_profile import DeanProfileOut
@@ -65,5 +65,3 @@ class DeanAccountIn(AdminAccountInBase):
 
 class PesoStaffAccountIn(AdminAccountInBase):
     pass
-
-

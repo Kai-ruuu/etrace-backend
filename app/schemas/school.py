@@ -11,6 +11,7 @@ class SchoolIn(SchoolBase):
 
 
 class SchoolOut(BaseModel):
+    id: int
     name: str
     is_archived: bool
     created_at: datetime
