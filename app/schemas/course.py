@@ -11,6 +11,7 @@ class CourseIn(CourseBase):
 
 
 class CourseOut(BaseModel):
+    id: int
     name: str
     is_archived: bool
     created_at: datetime

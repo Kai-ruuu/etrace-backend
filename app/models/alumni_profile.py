@@ -9,11 +9,11 @@ from app.core.enums import AlumniApprovalStatus, AlumniEmploymentStatus
 class AlumniProfile(Base):
     __tablename__ = "alumni_profiles"
     id: Mapped[int] = Column(Integer, primary_key=True, index=True)
-    profile_picture_filename: Mapped[str] = Column(String(255), nullable=False)
+    profile_picture_filename: Mapped[str | None] = Column(String(255), nullable=True, default=None)
     curriculum_vitae_filename: Mapped[str | None] = Column(String(255), nullable=True, default=None)
     dean_approval_status: Mapped[AlumniApprovalStatus] = Column(Enum(AlumniApprovalStatus), nullable=False, default=AlumniApprovalStatus.PENDING)
     employment_status: Mapped[AlumniEmploymentStatus] = Column(Enum(AlumniEmploymentStatus), nullable=False, default=AlumniEmploymentStatus.UNEMPLOYED)
-    prefix: Mapped[str | None] = Column(String(255), nullable=True)
+    name_extension: Mapped[str | None] = Column(String(15), nullable=True)
     first_name: Mapped[str] = Column(String(255), nullable=False)
     middle_name: Mapped[str | None] = Column(String(255), nullable=True, default=None)
     last_name: Mapped[str] = Column(String(255), nullable=False)

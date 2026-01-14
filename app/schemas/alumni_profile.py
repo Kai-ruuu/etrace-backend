@@ -10,7 +10,7 @@ class AlumniProfileBase(BaseModel):
     middle_name: str
     last_name: str
     account_id: int
-    prefix: str | None = None
+    name_extension: str | None = None
     first_name: str
     middle_name: str | None = None
     last_name: str
