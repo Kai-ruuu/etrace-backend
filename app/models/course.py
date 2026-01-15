@@ -10,7 +10,8 @@ class Course(Base):
     id: Mapped[int] = Column(Integer, primary_key=True, index=True)
     school_id: Mapped[int] = Column(Integer, ForeignKey("schools.id"))
     school: Mapped["School"] = relationship("School", back_populates="courses") # type: ignore
-    name: Mapped[str] = Column(String(255), nullable=False)
+    name: Mapped[str] = Column(String(255), nullable=False, unique=True)
+    normalized_name: Mapped[str] = Column(String(255), nullable=False, unique=True)
     alumni: Mapped[list["AlumniProfile"]] = relationship("AlumniProfile", back_populates="course", uselist=False) # type: ignore
     is_archived: Mapped[bool] = Column(Boolean, nullable=False, default=False)
     aligned_course_and_occupations: Mapped[list["AlignedCourseAndOccupation"]] = relationship("AlignedCourseAndOccupation", back_populates="course", uselist=True, cascade="all, delete-orphan") # type: ignore

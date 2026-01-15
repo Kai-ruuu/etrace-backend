@@ -26,6 +26,7 @@ class CourseService:
             
             new_course = await self.repo.create(Course(
                 name=course.name,
+                normalized_name=course.name.strip().lower(),
                 school_id=course.school_id
             ))
 
