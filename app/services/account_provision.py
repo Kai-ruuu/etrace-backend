@@ -11,6 +11,7 @@ from app.repositories.profile import ProfileRepository
 from app.repositories.occupation import OccupationRepository
 from app.repositories.occupation_state import OccupationStateRepository
 from app.utils.logging import Logger
+from app.utils.inputs import validated_email
 from app.utils.storage import Upload, UploadManager, DestFolder
 from app.utils.password import hash_password, generate_password
 from app.core.exceptions import *
@@ -264,7 +265,8 @@ class AccountProvisionService:
         if self.role != AccountRole.COMPANY:
             raise ValueError("Service role must be AccountRole.COMPANY in order to create a company.")
         
-        # [mark] add email validation logic here later
+        # raise if invalid
+        email = validated_email(email)
         
         await self.upload_manager.stage_uploads([
             Upload(file=logo_file, dest_folder=DestFolder.LOGO, allowed_mimes={"image/png", "image/jpg", "image/jpeg"}),
@@ -352,7 +354,8 @@ class AccountProvisionService:
         if self.role != AccountRole.ALUMNI:
             raise ValueError("Service role must be AccountRole.ALUMNI in order to create an Alumni.")
 
-        # [mark] add email validation logic here later
+        # raise if invalid
+        email = validated_email(email)
         
         await self.upload_manager.stage_uploads([
             Upload(file=profile_picture_file, dest_folder=DestFolder.PROFILE_PICTURE, allowed_mimes={"image/png", "image/jpg", "image/jpeg"}),

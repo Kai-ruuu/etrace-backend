@@ -13,7 +13,7 @@ from app.services.account_provision import AccountProvisionService
 router = APIRouter(tags=["system-admin"], prefix="/api/v1/user/system-admin")
 
 
-@router.post("/", response_model=SystemAdminAccountOut, tags=["system-admin: tested"])
+@router.post("/", response_model=SystemAdminAccountOut)
 @limiter.limit("10/minute")
 async def create(
     request: Request,
@@ -25,7 +25,7 @@ async def create(
     return await service.create_system_admin(user, system_admin, True)
     
 
-@router.get("/search", tags=["system-admin: tested"])
+@router.get("/search")
 @limiter.limit("10/minute")
 async def search(
     request: Request,
@@ -39,7 +39,7 @@ async def search(
     return await service.search(user, query, page, page_size)
 
 
-@router.patch("/{id}/disable", response_model=SystemAdminAccountOut, tags=["system-admin: tested"])
+@router.patch("/{id}/disable", response_model=SystemAdminAccountOut)
 @limiter.limit("10/minute")
 async def disable(
     request: Request,
@@ -51,7 +51,7 @@ async def disable(
     return await service.disable_by_id(user, id, True)
 
 
-@router.patch("/{id}/enable", response_model=SystemAdminAccountOut, tags=["system-admin: tested"])
+@router.patch("/{id}/enable", response_model=SystemAdminAccountOut)
 @limiter.limit("10/minute")
 async def enable(
     request: Request,
