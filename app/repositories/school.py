@@ -24,7 +24,7 @@ class SchoolRepository:
     
 
     async def get_by_name(self, name: str) -> School | None:
-        statement = select(School).where(School.name == name)
+        statement = select(School).where(School.normalized_name == name.strip().lower())
         result = await self.db.execute(statement)
         
         return result.scalar_one_or_none()
@@ -42,7 +42,7 @@ class SchoolRepository:
         count_statement = select(func.count()).select_from(School)
 
         if query:
-            search_filter = School.name.ilike(f"%{query}%")
+            search_filter = School.normalized_name.ilike(f"%{query}%")
             base_statement = base_statement.where(search_filter)
             count_statement = count_statement.where(search_filter)
         

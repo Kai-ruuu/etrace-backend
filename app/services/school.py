@@ -24,7 +24,10 @@ class SchoolService:
             if db_school:
                 raise SCHOOL_ALREADY_EXISTS_EXCEPTION
             
-            new_school = await self.repo.create(School(name=school.name))
+            new_school = await self.repo.create(School(
+                name=school.name,
+                normalized_name=school.name.strip().lower()
+            ))
 
             await self.db.commit()
             await self.db.refresh(new_school)
