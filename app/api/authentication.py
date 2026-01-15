@@ -2,11 +2,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import APIRouter, Request, Depends, UploadFile, Form, File
 
+from app.models.account import Account
 from app.utils.rate_limiting import limiter
+from app.core.dependencies import get_current_user
 from app.core.dependencies import get_db
 from app.core.enums import AccountRole, AlumniEmploymentStatus
+from app.schemas.account import (
+    CompanyAccountOut,
+    AlumniAccountOut,
+    DeanAccountOut,
+    PesoStaffAccountOut,
+    SystemAdminAccountOut
+)
 from app.schemas.authentication import Token
-from app.schemas.account import CompanyAccountOut, AlumniAccountOut
 from app.services.authentication import AuthenticationService
 from app.services.account_provision import AccountProvisionService
 
@@ -16,11 +24,27 @@ router = APIRouter(tags=["all"], prefix="/api/v1/authentication")
 @limiter.limit("10/minute")
 async def login(
     request: Request,
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db: AsyncSession=Depends(get_db)
+    db: AsyncSession=Depends(get_db),
+    form_data: OAuth2PasswordRequestForm = Depends()
 ) -> Token:
     authentication_service = AuthenticationService(db)
     return await authentication_service.authenticate_user(form_data)
+
+@router.get("/me")
+@limiter.limit("10/minute")
+async def me(
+    request: Request,
+    db: AsyncSession=Depends(get_db),
+    user: Account = Depends(get_current_user)
+) -> (
+    CompanyAccountOut |
+    AlumniAccountOut |
+    DeanAccountOut |
+    PesoStaffAccountOut |
+    SystemAdminAccountOut
+):
+    authentication_service = AuthenticationService(db)
+    return authentication_service.current_user_to_pymodel(user)
 
 @router.post("/register/company", response_model=CompanyAccountOut)
 @limiter.limit("10/minute")
