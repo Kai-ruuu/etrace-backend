@@ -17,14 +17,17 @@ class CourseService:
 
     async def create(self, user: Account, course: CourseIn, as_pymodel: bool = False) -> Course | CourseOut:
         user.permissions.raise_unauthorized_if_excludes(Action.CREATE_COURSES)
-        
+
         try:
             db_course = await self.repo.get_by_name(course.name)
 
             if db_course:
                 raise COURSE_ALREADY_EXISTS_EXCEPTION
             
-            new_course = await self.repo.create(Course(name=course.name))
+            new_course = await self.repo.create(Course(
+                name=course.name,
+                school_id=course.school_id
+            ))
 
             await self.db.commit()
             await self.db.refresh(new_course)

@@ -13,4 +13,4 @@ class School(Base):
     is_archived: Mapped[bool] = Column(Boolean, nullable=False, default=False)
     created_at: Mapped[datetime] = Column(DateTime(timezone=True), nullable=False, default=get_utc_now)
     updated_at: Mapped[datetime] = Column(DateTime(timezone=True), nullable=False, default=get_utc_now, onupdate=get_utc_now)
-
+    courses: Mapped[list["Course"]] = relationship("Course", back_populates="school", uselist=True) # type: ignore

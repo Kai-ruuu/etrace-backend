@@ -36,7 +36,10 @@ class AuthenticationService:
         if db_account.is_disabled:
             raise ACCOUNT_CURRENTLY_DISABLED_EXCEPTION
         
-        access_token = self.create_access_token(data={"sub": db_account.email})
+        access_token = self.create_access_token({
+            "sub": db_account.email,
+            "role": db_account.role
+        })
         
         return Token(
             access_token=access_token,

@@ -28,11 +28,14 @@ class Seeder:
         )
         
 
-    async def seed_course(self, db, dean_account: Account) -> Course:
+    async def seed_course(self, db, school_id: int, dean_account: Account) -> Course:
         service = CourseService(db)
         return await service.create(
             user=dean_account,
-            course=CourseIn(name="Bachelor of Science in Computer Science")
+            course=CourseIn(
+                name="Bachelor of Science in Computer Science",
+                school_id=school_id
+            )
         )
         
 
@@ -73,7 +76,7 @@ class Seeder:
             system_admin = await self.seed_system_admin(db)
             school = await self.seed_school(db, system_admin)
             dean = await self.seed_dean(db, system_admin, school.id)
-            await self.seed_course(db, dean)
+            await self.seed_course(db, school.id, dean)
             await self.seed_peso_staff(db, system_admin)
 
         Logger.success("Seeded users.")

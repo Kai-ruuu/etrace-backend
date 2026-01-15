@@ -11,6 +11,7 @@ from app.core.settings import settings
 from app.core.enums import AccountRole
 from app.core.database import AsyncSessionLocal
 from app.models.account import Account
+from app.repositories.account import AccountRepository
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/authentication/login")
 
@@ -19,21 +20,22 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 async def get_current_user(access_token: Annotated[str, Depends(oauth2_scheme)], db: AsyncSession=Depends(get_db)) -> Account:
+    
     secret_key = settings.APP_JWT_AUTHENTICATION_SECRET_KEY
     secret_key_algo = settings.APP_JWT_SECRET_KEY_ALGORITHM
     
     try:
         payload = decode(access_token, secret_key, algorithms=[secret_key_algo])
         email = payload.get("sub")
+        role = payload.get("role")
 
-        if email is None:
+        if email is None or role is None:
             raise TOKEN_INVALID_CREDENTIALS_EXCEPTION
     except InvalidTokenError:
         raise TOKEN_INVALID_CREDENTIALS_EXCEPTION
     
-    statement = select(Account).where(Account.email == email)
-    result = await db.execute(statement)
-    db_account = result.scalar_one_or_none()
+    account_repo = AccountRepository(db, role)
+    db_account = await account_repo.get_by_email(email)
     
     if not db_account:
         raise TOKEN_INVALID_CREDENTIALS_EXCEPTION
