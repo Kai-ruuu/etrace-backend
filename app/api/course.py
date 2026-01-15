@@ -13,7 +13,7 @@ from app.core.dependencies import get_db, allow_roles
 router = APIRouter(tags=["course"], prefix="/api/v1/insti/course")
 
 
-@router.post("/", response_model=CourseOut, tags=["course: tested"])
+@router.post("/", response_model=CourseOut)
 @limiter.limit("10/minute")
 async def create(
     request: Request,
@@ -25,7 +25,7 @@ async def create(
     return await service.create(user, course, True)
     
 
-@router.get("/search", tags=["course: tested"])
+@router.get("/search")
 @limiter.limit("10/minute")
 async def search(
     request: Request,
@@ -39,7 +39,7 @@ async def search(
     return await service.search(user, query, page, page_size)
 
 
-@router.patch("/{id}/archive", response_model=CourseOut, tags=["course: tested"])
+@router.patch("/{id}/archive", response_model=CourseOut)
 @limiter.limit("10/minute")
 async def archive(
     request: Request,
@@ -51,7 +51,7 @@ async def archive(
     return await service.archive_by_id(user, id, True)
 
 
-@router.patch("/{id}/restore", response_model=CourseOut, tags=["course: tested"])
+@router.patch("/{id}/restore", response_model=CourseOut)
 @limiter.limit("10/minute")
 async def restore(
     request: Request,

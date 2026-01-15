@@ -12,7 +12,7 @@ from app.services.account_provision import AccountProvisionService
 
 router = APIRouter(tags=["all"], prefix="/api/v1/authentication")
 
-@router.post("/login", response_model=Token, tags=["all: tested"])
+@router.post("/login", response_model=Token)
 @limiter.limit("10/minute")
 async def login(
     request: Request,
@@ -22,7 +22,7 @@ async def login(
     authentication_service = AuthenticationService(db)
     return await authentication_service.authenticate_user(form_data)
 
-@router.post("/register/company", response_model=CompanyAccountOut, tags=["company: tested"])
+@router.post("/register/company", response_model=CompanyAccountOut)
 @limiter.limit("10/minute")
 async def register_as_company(
     request: Request,
@@ -61,7 +61,7 @@ async def register_as_company(
         True
     )
 
-@router.post("/register/alumni", response_model=AlumniAccountOut, tags=["alumni: tested"])
+@router.post("/register/alumni", response_model=AlumniAccountOut)
 @limiter.limit("10/minute")
 async def register_as_alumni(
     request: Request,
@@ -74,7 +74,7 @@ async def register_as_alumni(
     address: str = Form(..., min_length=1, max_length=515),
     phone_number: str = Form(..., min_length=8, max_length=15),
     course_id: int = Form(...),
-    year_graduated: int = Form(...),
+    year_graduated: int = Form(..., ge=1000),
     employment_status: AlumniEmploymentStatus = Form(AlumniEmploymentStatus.UNEMPLOYED),
     occupations: str = Form(...),
     socials: str = Form(...),

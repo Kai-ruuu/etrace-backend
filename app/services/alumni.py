@@ -104,7 +104,7 @@ class AlumniService:
             raise ACCOUNT_NOT_FOUND_EXCEPTION
         
         if db_account.alumni_profile.dean_approval_status == AlumniApprovalStatus.APPROVED:
-            raise COMPANY_ALREADY_APPROVED_EXCEPTION
+            raise ALUMNI_ALREADY_APPROVED_EXCEPTION
 
         await self.profile_repo.approve_alumni(id, False)
         
@@ -122,7 +122,7 @@ class AlumniService:
             raise ACCOUNT_NOT_FOUND_EXCEPTION
         
         if db_account.alumni_profile.dean_approval_status == AlumniApprovalStatus.REJECTED:
-            raise COMPANY_ALREADY_REJECTED_EXCEPTION
+            raise ALUMNI_ALREADY_REJECTED_EXCEPTION
 
         await self.profile_repo.reject_alumni(id, False)
         
@@ -140,7 +140,7 @@ class AlumniService:
             raise ACCOUNT_NOT_FOUND_EXCEPTION
         
         if db_account.alumni_profile.dean_approval_status == AlumniApprovalStatus.PENDING:
-            raise COMPANY_ALREADY_PENDING_EXCEPTION
+            raise ALUMNI_ALREADY_PENDING_EXCEPTION
 
         await self.profile_repo.pend_alumni(id, False)
         

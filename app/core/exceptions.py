@@ -14,13 +14,16 @@ ACCOUNT_CURRENTLY_DISABLED_EXCEPTION = HTTPException(status.HTTP_403_FORBIDDEN, 
 
 UNABLE_TO_REGISTER_ACCOUNT_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to register account.")
 
-ADMIN_ACCOUNT_EXISTS_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Account already exists.")
-
 AUTHENTICATION_INVALID_CREDENTIALS_EXCEPTION = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail="Incorrect email address or password.",
     headers={"WWW-Authenticate": "Bearer"}
 )
+
+def RAISE_INVALID_EMAIL_EXCEPTION(error_message: str = "Invalid email format."):
+    raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, error_message)
+    
+EMAIL_INVALID_EXCEPTION = HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Invalid email format.")
 
 PROFILE_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "Profile not found.")
 
@@ -29,6 +32,12 @@ COMPANY_ALREADY_APPROVED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Co
 COMPANY_ALREADY_PENDING_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Company is already pending for approval.")
 
 COMPANY_ALREADY_REJECTED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Company is already rejected.")
+
+ALUMNI_ALREADY_APPROVED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Alumni is already approved.")
+
+ALUMNI_ALREADY_PENDING_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Alumni is already pending for approval.")
+
+ALUMNI_ALREADY_REJECTED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Alumni is already rejected.")
 
 TOKEN_INVALID_CREDENTIALS_EXCEPTION = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -64,13 +73,13 @@ UNABLE_TO_CREATE_COURSE_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVE
 
 def FILE_TYPE_NOT_SUPPORTED_EXCEPTION(file_field: str) -> None:
     raise HTTPException(
-        status.HTTP_400_BAD_REQUEST,
+        status.HTTP_422_UNPROCESSABLE_CONTENT,
         f"Unsopported file for {file_field.replace('_', ' ').capitalize()}."
     )
 
 def IMAGE_FILE_CANNOT_BE_READ_EXCEPTION(file_field: str) -> None:
     raise HTTPException(
-        status.HTTP_400_BAD_REQUEST,
+        status.HTTP_422_UNPROCESSABLE_CONTENT,
         f"Cannot read {file_field} image."
     )
 
@@ -82,13 +91,13 @@ def FILE_NOT_PROVIDED_EXCEPTION(file_field: str) -> None:
 
 def FILE_NAME_LENGTH_TOO_LONG_EXCEPTION(file_field: str, name_length_limit: int) -> None:
     raise HTTPException(
-        status.HTTP_400_BAD_REQUEST,
+        status.HTTP_422_UNPROCESSABLE_CONTENT,
         f"File name for {file_field.replace('_', ' ').capitalize()} is too long. It should not exceed {name_length_limit} characters."
     )
 
 def FILE_SIZE_TOO_BIG_EXCEPTION(file_field: str, file_size_limit: int) -> None:
     raise HTTPException(
-        status.HTTP_400_BAD_REQUEST,
+        status.HTTP_422_UNPROCESSABLE_CONTENT,
         f"File size for {file_field.replace('_', ' ').capitalize()} is too big. It should not exceed {file_size_limit} Mb."
     )
 

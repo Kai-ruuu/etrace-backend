@@ -12,7 +12,7 @@ from app.services.alumni import AlumniService
 router = APIRouter(tags=["alumni"], prefix="/api/v1/user/alumni")
     
 
-@router.get("/search", tags=["alumni: tested"])
+@router.get("/search")
 @limiter.limit("10/minute")
 async def search(
     request: Request,
@@ -26,7 +26,7 @@ async def search(
     return await service.search(user, query, page, page_size)
 
 
-@router.patch("/{id}/disable", response_model=AlumniAccountOut, tags=["alumni: tested"])
+@router.patch("/{id}/disable", response_model=AlumniAccountOut)
 @limiter.limit("10/minute")
 async def disable(
     request: Request,
@@ -38,7 +38,7 @@ async def disable(
     return await service.disable_by_id(user, id, True)
 
 
-@router.patch("/{id}/enable", response_model=AlumniAccountOut, tags=["alumni: tested"])
+@router.patch("/{id}/enable", response_model=AlumniAccountOut)
 @limiter.limit("10/minute")
 async def enable(
     request: Request,
@@ -50,7 +50,7 @@ async def enable(
     return await service.enable_by_id(user, id, True)
 
 
-@router.patch("/{id}/approve", response_model=AlumniAccountOut, tags=["alumni: tested"])
+@router.patch("/{id}/approve", response_model=AlumniAccountOut)
 @limiter.limit("10/minute")
 async def approve(
     request: Request,
@@ -62,7 +62,7 @@ async def approve(
     return await service.approve_by_id(user, id, True)
 
 
-@router.patch("/{id}/reject", response_model=AlumniAccountOut, tags=["alumni: tested"])
+@router.patch("/{id}/reject", response_model=AlumniAccountOut)
 @limiter.limit("10/minute")
 async def reject(
     request: Request,
@@ -74,7 +74,7 @@ async def reject(
     return await service.reject_by_id(user, id, True)
 
 
-@router.patch("/{id}/pend", response_model=AlumniAccountOut, tags=["alumni: tested"])
+@router.patch("/{id}/pend", response_model=AlumniAccountOut)
 @limiter.limit("10/minute")
 async def pend(
     request: Request,
