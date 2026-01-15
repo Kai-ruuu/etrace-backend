@@ -51,10 +51,10 @@ class AccountProvisionService:
             raise ValueError("Service role must be AccountRole.SYSTEM_ADMIN in order to bootstrap.")
         
         try:
-            hashed_password = hash_password(settings.APP_DEFAULT_SYSAD_PASS)
+            hashed_password = hash_password(settings.APP_DEFAULT_SYSAD_PASS.strip())
 
             account = await self.account_repo.create(Account(
-                email=settings.APP_DEFAULT_SYSAD_EMAIL,
+                email=settings.APP_DEFAULT_SYSAD_EMAIL.strip(),
                 password=hashed_password,
                 role=AccountRole.SYSTEM_ADMIN,
             ))
@@ -93,19 +93,20 @@ class AccountProvisionService:
         user.permissions.raise_unauthorized_if_excludes(Action.CREATE_SYSTEM_ADMINS)
         
         try:
-            hashed_password = hash_password(generate_password())
+            plain_password = generate_password()
+            hashed_password = hash_password(plain_password)
 
             account = await self.account_repo.create(Account(
-                email=system_admin.email,
+                email=system_admin.email.strip(),
                 password=hashed_password,
                 role=AccountRole.SYSTEM_ADMIN,
             ))
             
             profile = await self.profile_repo.create(SystemAdminProfile(
                 account_id=account.id,
-                first_name=system_admin.first_name,
-                middle_name=system_admin.middle_name,
-                last_name=system_admin.last_name
+                first_name=system_admin.first_name.strip(),
+                middle_name=system_admin.middle_name.strip() if system_admin.middle_name is not None else None,
+                last_name=system_admin.last_name.strip()
             ))
             
             await self.db.commit()
@@ -149,16 +150,16 @@ class AccountProvisionService:
             hashed_password = hash_password(plain_password)
 
             account = await self.account_repo.create(Account(
-                email=peso_staff.email,
+                email=peso_staff.email.strip(),
                 password=hashed_password,
                 role=AccountRole.PESO_STAFF,
             ))
             
             profile = await self.profile_repo.create(PesoStaffProfile(
                 account_id=account.id,
-                first_name=peso_staff.first_name,
-                middle_name=peso_staff.middle_name,
-                last_name=peso_staff.last_name
+                first_name=peso_staff.first_name.strip(),
+                middle_name=peso_staff.middle_name.strip() if peso_staff.middle_name is not None else None,
+                last_name=peso_staff.last_name.strip()
             ))
             
             await self.db.commit()
@@ -220,9 +221,9 @@ class AccountProvisionService:
             profile = await self.profile_repo.create(DeanProfile(
                 account_id=account.id,
                 school_id=dean.school_id,
-                first_name=dean.first_name,
-                middle_name=dean.middle_name,
-                last_name=dean.last_name
+                first_name=dean.first_name.strip(),
+                middle_name=dean.middle_name.strip() if dean.middle_name is not None else None,
+                last_name=dean.last_name.strip()
             ))
             
             await self.db.commit()
@@ -297,8 +298,8 @@ class AccountProvisionService:
             
             profile = await self.profile_repo.create(CompanyProfile(
                 account_id=account.id,
-                name=name,
-                address=address,
+                name=name.strip(),
+                address=address.strip(),
                 logo_filename=self.upload_manager.get_staged_file_name(DestFolder.LOGO),
                 sec_filename=self.upload_manager.get_staged_file_name(DestFolder.SEC),
                 profile_filename=self.upload_manager.get_staged_file_name(DestFolder.PROFILE),
@@ -372,12 +373,12 @@ class AccountProvisionService:
             profile = await self.profile_repo.create(AlumniProfile(
                 account_id=account.id,
                 name_extension=name_extension,
-                first_name=first_name,
-                middle_name=middle_name,
-                last_name=last_name,
-                address=address,
+                first_name=first_name.strip(),
+                middle_name=middle_name.strip() if middle_name is not None else None,
+                last_name=last_name.strip(),
+                address=address.strip(),
                 year_graduated=year_graduated,
-                phone_number=phone_number,
+                phone_number=phone_number.strip(),
                 employment_status=employment_status,
                 course_id=course_id,
                 profile_picture_filename=self.upload_manager.get_staged_file_name(DestFolder.PROFILE_PICTURE),
