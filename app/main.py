@@ -4,6 +4,7 @@ from slowapi import _rate_limit_exceeded_handler
 
 from app.models.all import *
 from app.api import dean
+from app.api import alumni
 from app.api import school
 from app.api import course
 from app.api import company
@@ -23,5 +24,6 @@ app.include_router(system_admin.router)
 app.include_router(dean.router)
 app.include_router(peso_staff.router)
 app.include_router(company.router)
+app.include_router(alumni.router)
 app.include_router(school.router)
 app.include_router(course.router)

@@ -19,8 +19,8 @@ async def search(
     query: str | None = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=20, le=100),
+    db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN, AccountRole.PESO_STAFF])),
-    db: AsyncSession = Depends(get_db)
 ) -> dict:
     service = CompanyService(db)
     return await service.search(user, query, page, page_size)
@@ -31,8 +31,8 @@ async def search(
 async def disable(
     request: Request,
     id: int,
+    db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN, AccountRole.PESO_STAFF])),
-    db: AsyncSession = Depends(get_db)
 ) -> CompanyAccountOut:
     service = CompanyService(db)
     return await service.disable_by_id(user, id, True)
@@ -43,8 +43,8 @@ async def disable(
 async def enable(
     request: Request,
     id: int,
+    db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN, AccountRole.PESO_STAFF])),
-    db: AsyncSession = Depends(get_db)
 ) -> CompanyAccountOut:
     service = CompanyService(db)
     return await service.enable_by_id(user, id, True)
@@ -55,8 +55,8 @@ async def enable(
 async def approve(
     request: Request,
     id: int,
+    db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN, AccountRole.PESO_STAFF])),
-    db: AsyncSession = Depends(get_db)
 ) -> CompanyAccountOut:
     service = CompanyService(db)
     return await service.approve_by_id(user, id, True)
@@ -67,8 +67,8 @@ async def approve(
 async def reject(
     request: Request,
     id: int,
+    db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN, AccountRole.PESO_STAFF])),
-    db: AsyncSession = Depends(get_db)
 ) -> CompanyAccountOut:
     service = CompanyService(db)
     return await service.reject_by_id(user, id, True)
@@ -79,8 +79,8 @@ async def reject(
 async def pend(
     request: Request,
     id: int,
+    db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN, AccountRole.PESO_STAFF])),
-    db: AsyncSession = Depends(get_db)
 ) -> CompanyAccountOut:
     service = CompanyService(db)
     return await service.pend_by_id(user, id, True)
