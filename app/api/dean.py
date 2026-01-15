@@ -18,8 +18,8 @@ router = APIRouter(tags=["dean"], prefix="/api/v1/user/dean")
 async def create(
     request: Request,
     dean: DeanAccountIn,
+    db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
-    db: AsyncSession = Depends(get_db)
 ) -> DeanAccountOut:
     service = AccountProvisionService(db, AccountRole.DEAN)
     return await service.create_dean(user, dean, True)
@@ -32,8 +32,8 @@ async def search(
     query: str | None = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=20, le=100),
+    db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
-    db: AsyncSession = Depends(get_db)
 ) -> dict:
     service = DeanService(db)
     return await service.search(user, query, page, page_size)
@@ -44,8 +44,8 @@ async def search(
 async def disable(
     request: Request,
     id: int,
+    db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
-    db: AsyncSession = Depends(get_db)
 ) -> DeanAccountOut:
     service = DeanService(db)
     return await service.disable_by_id(user, id, True)
@@ -56,8 +56,8 @@ async def disable(
 async def enable(
     request: Request,
     id: int,
+    db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
-    db: AsyncSession = Depends(get_db)
 ) -> DeanAccountOut:
     service = DeanService(db)
     return await service.enable_by_id(user, id, True)

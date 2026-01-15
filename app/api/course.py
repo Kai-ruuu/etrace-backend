@@ -18,8 +18,8 @@ router = APIRouter(tags=["course"], prefix="/api/v1/insti/course")
 async def create(
     request: Request,
     course: CourseIn,
+    db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN, AccountRole.DEAN])),
-    db: AsyncSession = Depends(get_db)
 ) -> CourseOut:
     service = CourseService(db)
     return await service.create(user, course, True)
@@ -32,8 +32,8 @@ async def search(
     query: str | None = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=20, le=100),
+    db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN, AccountRole.DEAN])),
-    db: AsyncSession = Depends(get_db)
 ) -> dict:
     service = CourseService(db)
     return await service.search(user, query, page, page_size)
@@ -44,8 +44,8 @@ async def search(
 async def archive(
     request: Request,
     id: int,
+    db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.DEAN])),
-    db: AsyncSession = Depends(get_db)
 ) -> CourseOut:
     service = CourseService(db)
     return await service.archive_by_id(user, id, True)
@@ -56,8 +56,8 @@ async def archive(
 async def restore(
     request: Request,
     id: int,
+    db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.DEAN])),
-    db: AsyncSession = Depends(get_db)
 ) -> CourseOut:
     service = CourseService(db)
     return await service.restore_by_id(user, id, True)

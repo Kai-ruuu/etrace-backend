@@ -21,6 +21,11 @@ class Action(StrEnum):
     CREATE_COURSES = auto()
     READ_COURSES = auto()
     ARCHIVE_RESTORE_COURSES = auto()
+    READ_ALUMNI = auto()
+    ENABLE_DISABLE_ALUMNI = auto()
+    APPROVE_ALUMNI = auto()
+    REJECT_ALUMNI = auto()
+    PEND_ALUMNI = auto()
 
 class AccountRole(StrEnum):
     SYSTEM_ADMIN = "SYSTEM_ADMIN"

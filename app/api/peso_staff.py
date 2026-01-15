@@ -18,8 +18,8 @@ router = APIRouter(tags=["peso-staff"], prefix="/api/v1/user/peso-staff")
 async def create(
     request: Request,
     peso_staff: PesoStaffAccountIn,
+    db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
-    db: AsyncSession = Depends(get_db)
 ) -> PesoStaffAccountOut:
     service = AccountProvisionService(db, AccountRole.PESO_STAFF)
     return await service.create_peso_staff(user, peso_staff, True)
@@ -32,8 +32,8 @@ async def search(
     query: str | None = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=20, le=100),
+    db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
-    db: AsyncSession = Depends(get_db)
 ) -> dict:
     service = PesoStaffService(db)
     return await service.search(user, query, page, page_size)
@@ -44,8 +44,8 @@ async def search(
 async def disable(
     request: Request,
     id: int,
+    db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
-    db: AsyncSession = Depends(get_db)
 ) -> PesoStaffAccountOut:
     service = PesoStaffService(db)
     return await service.disable_by_id(user, id, True)
@@ -56,8 +56,8 @@ async def disable(
 async def enable(
     request: Request,
     id: int,
+    db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
-    db: AsyncSession = Depends(get_db)
 ) -> PesoStaffAccountOut:
     service = PesoStaffService(db)
     return await service.enable_by_id(user, id, True)

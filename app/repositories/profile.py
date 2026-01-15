@@ -2,7 +2,7 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_, func, literal
 
-from app.core.enums import AccountRole, CompanyApprovalStatus
+from app.core.enums import AccountRole, CompanyApprovalStatus, AlumniApprovalStatus
 from app.schemas.dean_profile import DeanProfileOut
 from app.schemas.alumni_profile import AlumniProfileOut
 from app.schemas.company_profile import CompanyProfileOut
@@ -164,6 +164,33 @@ class ProfileRepository:
         await self.db.commit()
         await self.db.refresh(db_profile)
         return CompanyProfileOut.model_validate(db_profile) if as_pymodel else db_profile
+    
+    
+    async def approve_alumni(self, account_id: int, as_pymodel: bool = False) -> AlumniProfile | AlumniProfileOut:
+        db_profile = await self.get_by_account_id(account_id, False)
+        db_profile.dean_approval_status = AlumniApprovalStatus.APPROVED
+        
+        await self.db.commit()
+        await self.db.refresh(db_profile)
+        return AlumniProfileOut.model_validate(db_profile) if as_pymodel else db_profile
+    
+    
+    async def reject_alumni(self, account_id: int, as_pymodel: bool = False) -> AlumniProfile | AlumniProfileOut:
+        db_profile = await self.get_by_account_id(account_id, False)
+        db_profile.dean_approval_status = AlumniApprovalStatus.REJECTED
+        
+        await self.db.commit()
+        await self.db.refresh(db_profile)
+        return AlumniProfileOut.model_validate(db_profile) if as_pymodel else db_profile
+    
+    
+    async def pend_alumni(self, account_id: int, as_pymodel: bool = False) -> AlumniProfile | AlumniProfileOut:
+        db_profile = await self.get_by_account_id(account_id, False)
+        db_profile.dean_approval_status = AlumniApprovalStatus.PENDING
+        
+        await self.db.commit()
+        await self.db.refresh(db_profile)
+        return AlumniProfileOut.model_validate(db_profile) if as_pymodel else db_profile
 
     
     @property

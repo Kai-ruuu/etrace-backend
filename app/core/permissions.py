@@ -39,6 +39,11 @@ class Permissions:
                     Action.CREATE_COURSES,
                     Action.READ_COURSES,
                     Action.ARCHIVE_RESTORE_COURSES,
+                    Action.READ_ALUMNI,
+                    Action.ENABLE_DISABLE_ALUMNI,
+                    Action.APPROVE_ALUMNI,
+                    Action.REJECT_ALUMNI,
+                    Action.PEND_ALUMNI,
                 })
             case AccountRole.PESO_STAFF:
                 self.actions.update({
