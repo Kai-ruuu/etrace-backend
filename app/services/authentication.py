@@ -4,6 +4,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.models.account import Account
+from app.core.enums import AccountRole
+from app.schemas.account import (
+    CompanyAccountOut,
+    AlumniAccountOut,
+    DeanAccountOut,
+    PesoStaffAccountOut,
+    SystemAdminAccountOut
+)
 from app.schemas.authentication import Token
 from app.core.exceptions import *
 from app.core.settings import settings
@@ -45,3 +53,30 @@ class AuthenticationService:
             access_token=access_token,
             token_type="bearer"
         )
+    
+    def current_user_to_pymodel(self, user: Account) -> (
+        CompanyAccountOut |
+        AlumniAccountOut |
+        DeanAccountOut |
+        PesoStaffAccountOut |
+        SystemAdminAccountOut
+    ):
+        AccountPymodel = AccountRole.ALUMNI
+    
+        match user.role:
+            case AccountRole.SYSTEM_ADMIN:
+                AccountPymodel = SystemAdminAccountOut
+            case AccountRole.PESO_STAFF:
+                AccountPymodel = PesoStaffAccountOut
+            case AccountRole.COMPANY:
+                AccountPymodel = CompanyAccountOut
+            case AccountRole.ALUMNI:
+                AccountPymodel = AlumniAccountOut
+            case AccountRole.DEAN:
+                AccountPymodel = DeanAccountOut
+            case _:
+                raise ValueError("Invalid role value.")
+        
+        return AccountPymodel.model_validate(user)
+
+
