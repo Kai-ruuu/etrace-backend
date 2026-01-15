@@ -7,7 +7,7 @@ class CourseBase(BaseModel):
 
 
 class CourseIn(CourseBase):
-    pass
+    school_id: int
 
 
 class CourseOut(BaseModel):
