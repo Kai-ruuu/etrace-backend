@@ -85,20 +85,16 @@ class Seeder:
         Logger.success("Created tables.")
 
 
-async def main(create_tables: bool=False):
+async def main():
     seeder = Seeder()
     seeder.create_tables()
     await seeder.seed()
 
 if __name__ == "__main__":
-    argv = sys.argv
+    run_after = "-r" in sys.argv
     
-    create_tables = "-c" in argv
-    run_after = "-r" in argv
-    create_and_run = "-cr" in argv
-    
-    asyncio.run(main(create_and_run or create_tables))
+    asyncio.run(main())
 
-    if create_and_run or run_after:
+    if run_after:
         subprocess.run(["uvicorn", "app.main:app", "--reload"])
 
