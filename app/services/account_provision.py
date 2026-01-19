@@ -318,8 +318,12 @@ class AccountProvisionService:
 
             return CompanyAccountOut.model_validate(account) if as_pymodel else (account, profile)
         except HTTPException as e:
+            await self.db.rollback()
+            await self.upload_manager.rollback()
             raise e
         except IntegrityError as e:
+            await self.db.rollback()
+            await self.upload_manager.rollback()
             Logger.error(f"Unable to create Company's account and profile - {repr(e)}")
             
             match e.orig.args[0]:
@@ -329,6 +333,7 @@ class AccountProvisionService:
                     raise UNABLE_TO_REGISTER_ACCOUNT_EXCEPTION
         except Exception as e:
             await self.db.rollback()
+            await self.upload_manager.rollback()
             Logger.error(f"Unable to create Company's account and profile - {repr(e)}")
             raise UNABLE_TO_REGISTER_ACCOUNT_EXCEPTION
 
@@ -423,7 +428,12 @@ class AccountProvisionService:
             await self.upload_manager.commit()
 
             return AlumniAccountOut.model_validate(account) if as_pymodel else (account, profile)
+        except HTTPException as e:
+            await self.db.rollback()
+            await self.upload_manager.rollback()
+            raise e
         except IntegrityError as e:
+            await self.db.rollback()
             await self.upload_manager.rollback()
             Logger.error(f"Unable to create Alumni's account and profile - {repr(e)}")
             
@@ -433,6 +443,7 @@ class AccountProvisionService:
                 case _:
                     raise UNABLE_TO_REGISTER_ACCOUNT_EXCEPTION
         except Exception as e:
+            await self.db.rollback()
             await self.upload_manager.rollback()
             Logger.error(f"Unable to create Alumni's account and profile - {repr(e)}")
             raise UNABLE_TO_REGISTER_ACCOUNT_EXCEPTION

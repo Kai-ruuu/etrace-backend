@@ -143,6 +143,14 @@ class UploadManager:
         content = await file.read(2048)
         mime = magic.from_buffer(content, mime=True)
         file.file.seek(0)
+
+        # check if it's actually a csv and not a plain text
+        if mime == "text/plain":
+            header = content.decode(errors="ignore").splitlines()[0]
+            
+            if "," in header:
+                mime = "text/csv"
+                
         return mime
 
 
@@ -252,6 +260,11 @@ class UploadManager:
     def get_staged_file_name(self, dest_folder: DestFolder) -> str | None:
         info = self.staged_files_info.get(dest_folder.value)
         return info.get("filename") if info else None
+    
+    
+    def get_staged_file_path(self, dest_folder: DestFolder) -> str | None:
+        info = self.staged_files_info.get(dest_folder.value)
+        return info.get("temp_file_path") if info else None
 
     
     async def commit(self) -> None:
