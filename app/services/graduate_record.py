@@ -72,23 +72,23 @@ class GraduateRecordService:
     async def get_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> GraduateRecord | GraduateRecordOut:
         user.permissions.raise_unauthorized_if_excludes(Action.READ_GRADUATE_RECORDS)
         
-        db_school = await self.repo.get_by_id(id)
+        db_graduate_record = await self.repo.get_by_id(id)
 
-        if not db_school:
+        if not db_graduate_record:
             raise GRADUATE_RECORD_NOT_FOUND_EXCEPTION
         
-        return GraduateRecordOut.model_validate(db_school) if as_pymodel else db_school
+        return GraduateRecordOut.model_validate(db_graduate_record) if as_pymodel else db_graduate_record
 
     
     async def get_by_name(self, user: Account, name: str, as_pymodel: bool = False) -> GraduateRecord | GraduateRecordOut:
         user.permissions.raise_unauthorized_if_excludes(Action.READ_GRADUATE_RECORDS)
 
-        db_school = await self.repo.get_by_name(name)
+        db_graduate_record = await self.repo.get_by_name(name)
 
-        if not db_school:
+        if not db_graduate_record:
             raise GRADUATE_RECORD_NOT_FOUND_EXCEPTION
         
-        return GraduateRecordOut.model_validate(db_school) if as_pymodel else db_school
+        return GraduateRecordOut.model_validate(db_graduate_record) if as_pymodel else db_graduate_record
     
     
     async def search(self, user: Account, query: str, page: int = 1, page_size: int = 20) -> dict:
@@ -112,30 +112,30 @@ class GraduateRecordService:
     async def archive_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> GraduateRecord | GraduateRecordOut:
         user.permissions.raise_unauthorized_if_excludes(Action.ARCHIVE_RESTORE_GRADUATE_RECORDS)
 
-        db_school = await self.repo.get_by_id(id)
+        db_graduate_record = await self.repo.get_by_id(id)
 
-        if not db_school:
-            raise SCHOOL_NOT_FOUND_EXCEPTION
+        if not db_graduate_record:
+            raise GRADUATE_RECORD_NOT_FOUND_EXCEPTION
         
-        if db_school.is_archived:
+        if db_graduate_record.is_archived:
             raise GRADUATE_RECORD_ALREADY_ARCHIVED_EXCEPTION
         
-        db_school = await self.repo.archive(db_school)
+        db_graduate_record = await self.repo.archive(db_graduate_record)
         
-        return GraduateRecordOut.model_validate(db_school) if as_pymodel else db_school
+        return GraduateRecordOut.model_validate(db_graduate_record) if as_pymodel else db_graduate_record
 
     
     async def restore_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> GraduateRecord | GraduateRecordOut:
         user.permissions.raise_unauthorized_if_excludes(Action.ARCHIVE_RESTORE_GRADUATE_RECORDS)
 
-        db_school = await self.repo.get_by_id(id)
+        db_graduate_record = await self.repo.get_by_id(id)
 
-        if not db_school:
-            raise SCHOOL_NOT_FOUND_EXCEPTION
+        if not db_graduate_record:
+            raise GRADUATE_RECORD_NOT_FOUND_EXCEPTION
         
-        if not db_school.is_archived:
+        if not db_graduate_record.is_archived:
             raise GRADUATE_RECORD_ALREADY_RESTORED_EXCEPTION
         
-        db_school = await self.repo.restore(db_school)
+        db_graduate_record = await self.repo.restore(db_graduate_record)
         
-        return GraduateRecordOut.model_validate(db_school) if as_pymodel else db_school
+        return GraduateRecordOut.model_validate(db_graduate_record) if as_pymodel else db_graduate_record
