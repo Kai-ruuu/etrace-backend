@@ -2,6 +2,7 @@ from fastapi import HTTPException, status
 
 ACCOUNT_ALREADY_EXISTS_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Account already exists.")
 
+
 ACCOUNT_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "Account not found.")
 
 ACCOUNT_ALREADY_DISABLED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Account is already disabled.")
@@ -71,6 +72,22 @@ COURSE_ALREADY_RESTORED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Cou
 
 UNABLE_TO_CREATE_COURSE_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to create course.")
 
+GRADUATE_RECORD_ALREADY_EXISTS_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Graduate record already exists.")
+
+GRADUATE_RECORD_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "Graduate record not found.")
+
+GRADUATE_RECORD_ALREADY_ARCHIVED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Graduate record is already archived.")
+
+GRADUATE_RECORD_ALREADY_RESTORED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Graduate record is already restored.")
+
+UNABLE_TO_CREATE_GRADUATE_RECORD_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to create graduate record.")
+
+def RAISE_FILE_CANNOT_BE_READ_EXCEPTION(file_field: str) -> None:
+    raise HTTPException(
+        status.HTTP_422_UNPROCESSABLE_CONTENT,
+        f"Cannot read {file_field}."
+    )
+
 def FILE_TYPE_NOT_SUPPORTED_EXCEPTION(file_field: str) -> None:
     raise HTTPException(
         status.HTTP_422_UNPROCESSABLE_CONTENT,
@@ -101,3 +118,22 @@ def FILE_SIZE_TOO_BIG_EXCEPTION(file_field: str, file_size_limit: int) -> None:
         f"File size for {file_field.replace('_', ' ').capitalize()} is too big. It should not exceed {file_size_limit} Mb."
     )
 
+def RAISE_CSV_MISSING_COLUMNS_EXCEPTION(missing_columns: set[str]) -> None:
+    missing_columns = ", ".join(missing_columns)
+    
+    raise HTTPException(
+        status.HTTP_422_UNPROCESSABLE_CONTENT,
+        f"Unable to process the record, please add these missing columns and their data: {missing_columns}"
+    )
+
+def RAISE_CSV_MISSING_COLUMN_VALUE_EXCEPTION(column: str) -> None:
+    raise HTTPException(
+        status.HTTP_422_UNPROCESSABLE_CONTENT,
+        f"There are rows where the required \"{column}\" column has no value."
+    )
+
+def RAISE_CSV_INCONSISTENT_DATE_FORMAT_EXCEPTION(column: str) -> None:
+    raise HTTPException(
+        status.HTTP_422_UNPROCESSABLE_CONTENT,
+        f'There are rows where the date column "{column}" has a different format from the others.'
+    )

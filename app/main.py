@@ -11,6 +11,7 @@ from app.api import company
 from app.api import peso_staff
 from app.api import system_admin
 from app.api import authentication
+from app.api import graduate_record
 from app.utils.setup import lifespan
 from app.utils.rate_limiting import limiter
 
@@ -27,3 +28,4 @@ app.include_router(company.router)
 app.include_router(alumni.router)
 app.include_router(school.router)
 app.include_router(course.router)
+app.include_router(graduate_record.router)

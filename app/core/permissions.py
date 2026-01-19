@@ -44,6 +44,9 @@ class Permissions:
                     Action.APPROVE_ALUMNI,
                     Action.REJECT_ALUMNI,
                     Action.PEND_ALUMNI,
+                    Action.CREATE_GRADUATE_RECORDS,
+                    Action.READ_GRADUATE_RECORDS,
+                    Action.ARCHIVE_RESTORE_GRADUATE_RECORDS,
                 })
             case AccountRole.PESO_STAFF:
                 self.actions.update({

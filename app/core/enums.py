@@ -26,6 +26,9 @@ class Action(StrEnum):
     APPROVE_ALUMNI = auto()
     REJECT_ALUMNI = auto()
     PEND_ALUMNI = auto()
+    CREATE_GRADUATE_RECORDS = auto()
+    READ_GRADUATE_RECORDS = auto()
+    ARCHIVE_RESTORE_GRADUATE_RECORDS = auto()
 
 class AccountRole(StrEnum):
     SYSTEM_ADMIN = "SYSTEM_ADMIN"
