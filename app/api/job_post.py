@@ -12,6 +12,19 @@ from app.core.dependencies import get_db, allow_roles
 router = APIRouter(tags=["job-post"], prefix="/api/v1/user/job_post")
 
 
+@router.get("/")
+@limiter.limit("10/minute")
+async def get_latest(
+    request: Request,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=20, le=100),
+    db: AsyncSession = Depends(get_db),
+    user: Account = Depends(allow_roles([AccountRole.ALUMNI])),
+) -> dict:
+    service = JobPostService(db)
+    return await service.get_by_latest(user, page, page_size)
+
+
 @router.post("/", response_model=JobPostOut)
 @limiter.limit("10/minute")
 async def create(
