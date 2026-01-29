@@ -84,7 +84,7 @@ class Seeder:
 
     def create_tables(self) -> None:
         Logger.info("Creating database tables...")
-        subprocess.run(["alembic", "upgrade", "head"])
+        subprocess.run(["py", "-m", "alembic", "upgrade", "head"])
         Logger.success("Created tables.")
 
 
@@ -99,5 +99,5 @@ if __name__ == "__main__":
     asyncio.run(main())
 
     if run_after:
-        subprocess.run(["uvicorn", "app.main:app", "--reload"])
+        subprocess.run(["py", "-m", "uvicorn", "app.main:app", "--reload"])
 

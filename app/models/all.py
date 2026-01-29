@@ -8,6 +8,7 @@ from app.models.dean_profile import DeanProfile
 from app.models.graduate_record import GraduateRecord
 from app.models.job_post_like import JobPostLike
 from app.models.job_post import JobPost
+from app.models.job_post_course import JobPostCourse
 from app.models.occupation_state import OccupationState
 from app.models.occupation import Occupation
 from app.models.peso_staff_profile import PesoStaffProfile

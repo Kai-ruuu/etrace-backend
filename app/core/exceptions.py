@@ -34,6 +34,8 @@ COMPANY_ALREADY_PENDING_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Com
 
 COMPANY_ALREADY_REJECTED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Company is already rejected.")
 
+COMPANY_PROFILE_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "Company profile not found.")
+
 ALUMNI_ALREADY_APPROVED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Alumni is already approved.")
 
 ALUMNI_ALREADY_PENDING_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Alumni is already pending for approval.")
@@ -64,6 +66,9 @@ UNABLE_TO_CREATE_SCHOOL_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVE
 
 COURSE_ALREADY_EXISTS_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Course already exists.")
 
+def RAISE_COURSES_NOT_FOUND_BY_IDS(ids: list[int]) -> None:
+    raise HTTPException(status.HTTP_404_NOT_FOUND, f"Course with ids ({', '.join(ids)}) were not found.")
+
 COURSE_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "Course not found.")
 
 COURSE_ALREADY_ARCHIVED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Course is already archived.")
@@ -81,6 +86,26 @@ GRADUATE_RECORD_ALREADY_ARCHIVED_EXCEPTION = HTTPException(status.HTTP_409_CONFL
 GRADUATE_RECORD_ALREADY_RESTORED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Graduate record is already restored.")
 
 UNABLE_TO_CREATE_GRADUATE_RECORD_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to create graduate record.")
+
+JOB_POST_ALREADY_EXISTS_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Job post already exists.")
+
+JOB_POST_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "Job post not found.")
+
+JOB_POST_ALREADY_ARCHIVED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Job post is already archived.")
+
+JOB_POST_ALREADY_RESTORED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Job post is already restored.")
+
+JOB_POST_ALREADY_UNPUBLISHED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Job post is already not published.")
+
+JOB_POST_ALREADY_PUBLISHED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Job post is already published.")
+
+JOB_POST_PUBLISH_ARCHIVED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Job post is currently archived. Please restore it fist before publishing.")
+
+JOB_POST_UNPUBLISH_ARCHIVED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Job post is currently archived. Please restore it fist before unpublishing.")
+
+JOB_POST_ARCHIVE_PUBLISHED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Job post is currently published. Please unpublish it first before archiving.")
+
+UNABLE_TO_CREATE_JOB_POST_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to create job post.")
 
 def RAISE_FILE_CANNOT_BE_READ_EXCEPTION(file_field: str) -> None:
     raise HTTPException(
