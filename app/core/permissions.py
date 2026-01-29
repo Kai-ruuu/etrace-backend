@@ -57,6 +57,13 @@ class Permissions:
                     # [mark] review if appropriate
                     Action.ENABLE_DISABLE_COMPANIES,
                 })
+            case AccountRole.COMPANY:
+                self.actions.update({
+                    Action.CREATE_JOB_POSTS,
+                    Action.READ_JOB_POSTS,
+                    Action.ARCHIVE_RESTORE_JOB_POSTS,
+                    Action.PUBLISH_UNPUBLISH_JOB_POSTS,
+                })
 
     
     def can(self, action: Action) -> bool:

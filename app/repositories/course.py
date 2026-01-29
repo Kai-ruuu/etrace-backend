@@ -36,6 +36,15 @@ class CourseRepository:
 
         return result.scalars().all()
     
+    
+    # [mark] for existence check only
+    async def get_batch_exists(self, ids: list[int]) -> tuple[bool, list]:
+        statement = select(Course.id).where(Course.id.in_(ids))
+        result = await self.db.execute(statement)
+        found_ids = set(result.scalars().all())
+        missing_ids = set(ids) - found_ids
+        return len(missing_ids) == 0, list(missing_ids)
+    
 
     async def search(self, query: str | None = None, page: int = 1, page_size: int = 20) -> tuple[list[Course], int, int]:
         base_statement = select(Course)

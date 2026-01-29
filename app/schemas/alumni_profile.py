@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 from app.core.enums import AlumniApprovalStatus, AlumniEmploymentStatus
 
+
 class AlumniProfileBase(BaseModel):
     profile_picture_filename: str
     curriculum_vitae_filename: str
@@ -15,6 +16,7 @@ class AlumniProfileBase(BaseModel):
     middle_name: str | None = None
     last_name: str
     model_config = {"from_attributes": True}
+
 
 class AlumniProfileOut(AlumniProfileBase):
     id: int

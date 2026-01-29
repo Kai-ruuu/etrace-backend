@@ -16,6 +16,7 @@ class Course(Base):
     is_archived: Mapped[bool] = Column(Boolean, nullable=False, default=False)
     aligned_course_and_occupations: Mapped[list["AlignedCourseAndOccupation"]] = relationship("AlignedCourseAndOccupation", back_populates="course", uselist=True, cascade="all, delete-orphan") # type: ignore
     graduate_records: Mapped[list["GraduateRecord"]] = relationship("GraduateRecord", back_populates="course", uselist=True, cascade="all, delete-orphan") # type: ignore
+    course_job_posts: Mapped[list["JobPostCourse"]] = relationship("JobPostCourse", back_populates="job_post_course") # type: ignore
     created_at: Mapped[datetime] = Column(DateTime(timezone=True), nullable=False, default=get_utc_now)
     updated_at: Mapped[datetime] = Column(DateTime(timezone=True), nullable=False, default=get_utc_now, onupdate=get_utc_now)
 

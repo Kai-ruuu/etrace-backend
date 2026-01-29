@@ -8,6 +8,7 @@ from app.api import alumni
 from app.api import school
 from app.api import course
 from app.api import company
+from app.api import job_post
 from app.api import peso_staff
 from app.api import system_admin
 from app.api import authentication
@@ -22,10 +23,11 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.include_router(authentication.router)
 app.include_router(system_admin.router)
-app.include_router(dean.router)
-app.include_router(peso_staff.router)
-app.include_router(company.router)
-app.include_router(alumni.router)
 app.include_router(school.router)
+app.include_router(dean.router)
 app.include_router(course.router)
 app.include_router(graduate_record.router)
+app.include_router(peso_staff.router)
+app.include_router(company.router)
+app.include_router(job_post.router)
+app.include_router(alumni.router)

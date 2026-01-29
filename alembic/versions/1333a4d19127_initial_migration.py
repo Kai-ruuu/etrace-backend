@@ -1,8 +1,8 @@
-"""initial
+"""initial migration
 
-Revision ID: 0bfc7ead1bf3
+Revision ID: 1333a4d19127
 Revises: 
-Create Date: 2026-01-12 18:39:53.035632
+Create Date: 2026-01-29 20:10:22.177120
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '0bfc7ead1bf3'
+revision: str = '1333a4d19127'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -33,63 +33,27 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_accounts_email'), 'accounts', ['email'], unique=True)
     op.create_index(op.f('ix_accounts_id'), 'accounts', ['id'], unique=False)
-    op.create_table('courses',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(length=255), nullable=False),
-    sa.Column('is_inactive', sa.Boolean(), nullable=False),
-    sa.Column('is_archived', sa.Boolean(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_courses_id'), 'courses', ['id'], unique=False)
     op.create_table('occupations',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(length=255), nullable=False),
-    sa.PrimaryKeyConstraint('id')
+    sa.Column('normalized_title', sa.String(length=255), nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('normalized_title'),
+    sa.UniqueConstraint('title')
     )
     op.create_index(op.f('ix_occupations_id'), 'occupations', ['id'], unique=False)
     op.create_table('schools',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
+    sa.Column('normalized_name', sa.String(length=255), nullable=False),
     sa.Column('is_archived', sa.Boolean(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name'),
+    sa.UniqueConstraint('normalized_name')
     )
     op.create_index(op.f('ix_schools_id'), 'schools', ['id'], unique=False)
-    op.create_table('aligned_occupations',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('course_id', sa.Integer(), nullable=True),
-    sa.Column('occupation_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['course_id'], ['courses.id'], ),
-    sa.ForeignKeyConstraint(['occupation_id'], ['occupations.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_aligned_occupations_id'), 'aligned_occupations', ['id'], unique=False)
-    op.create_table('alumni_profiles',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('profile_picture_filename', sa.String(length=255), nullable=False),
-    sa.Column('curriculum_vitae_filename', sa.String(length=255), nullable=True),
-    sa.Column('dean_approval_status', sa.Enum('PENDING', 'APPROVED', 'REJECTED', name='alumniapprovalstatus'), nullable=False),
-    sa.Column('employment_status', sa.Enum('EMPLOYED', 'UNEMPLOYED', 'SELF_EMPLOYED', name='alumniemploymentstatus'), nullable=False),
-    sa.Column('prefix', sa.String(length=255), nullable=True),
-    sa.Column('first_name', sa.String(length=255), nullable=False),
-    sa.Column('middle_name', sa.String(length=255), nullable=True),
-    sa.Column('last_name', sa.String(length=255), nullable=False),
-    sa.Column('year_graduated', sa.Integer(), nullable=False),
-    sa.Column('address', sa.String(length=515), nullable=False),
-    sa.Column('phone_number', sa.String(length=15), nullable=False),
-    sa.Column('course_id', sa.Integer(), nullable=True),
-    sa.Column('account_id', sa.Integer(), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.ForeignKeyConstraint(['account_id'], ['accounts.id'], ),
-    sa.ForeignKeyConstraint(['course_id'], ['courses.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('account_id')
-    )
-    op.create_index(op.f('ix_alumni_profiles_id'), 'alumni_profiles', ['id'], unique=False)
     op.create_table('audit_logs',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('action', sa.String(length=255), nullable=False),
@@ -102,7 +66,7 @@ def upgrade() -> None:
     op.create_table('company_profiles',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
-    sa.Column('location', sa.String(length=1025), nullable=False),
+    sa.Column('address', sa.String(length=1025), nullable=False),
     sa.Column('logo_filename', sa.String(length=255), nullable=False),
     sa.Column('sec_filename', sa.String(length=255), nullable=False),
     sa.Column('profile_filename', sa.String(length=255), nullable=False),
@@ -123,6 +87,20 @@ def upgrade() -> None:
     sa.UniqueConstraint('account_id')
     )
     op.create_index(op.f('ix_company_profiles_id'), 'company_profiles', ['id'], unique=False)
+    op.create_table('courses',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('school_id', sa.Integer(), nullable=True),
+    sa.Column('name', sa.String(length=255), nullable=False),
+    sa.Column('normalized_name', sa.String(length=255), nullable=False),
+    sa.Column('is_archived', sa.Boolean(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
+    sa.ForeignKeyConstraint(['school_id'], ['schools.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name'),
+    sa.UniqueConstraint('normalized_name')
+    )
+    op.create_index(op.f('ix_courses_id'), 'courses', ['id'], unique=False)
     op.create_table('dean_profiles',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('first_name', sa.String(length=255), nullable=False),
@@ -138,19 +116,6 @@ def upgrade() -> None:
     sa.UniqueConstraint('account_id')
     )
     op.create_index(op.f('ix_dean_profiles_id'), 'dean_profiles', ['id'], unique=False)
-    op.create_table('graduate_records',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('record_filename', sa.String(length=255), nullable=False),
-    sa.Column('is_archived', sa.Boolean(), nullable=False),
-    sa.Column('graduation_year', sa.Integer(), nullable=False),
-    sa.Column('course_id', sa.Integer(), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.ForeignKeyConstraint(['course_id'], ['courses.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('record_filename')
-    )
-    op.create_index(op.f('ix_graduate_records_id'), 'graduate_records', ['id'], unique=False)
     op.create_table('peso_staff_profiles',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('first_name', sa.String(length=255), nullable=False),
@@ -177,9 +142,55 @@ def upgrade() -> None:
     sa.UniqueConstraint('account_id')
     )
     op.create_index(op.f('ix_system_admin_profiles_id'), 'system_admin_profiles', ['id'], unique=False)
+    op.create_table('aligned_occupations',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('course_id', sa.Integer(), nullable=True),
+    sa.Column('occupation_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['course_id'], ['courses.id'], ),
+    sa.ForeignKeyConstraint(['occupation_id'], ['occupations.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_aligned_occupations_id'), 'aligned_occupations', ['id'], unique=False)
+    op.create_table('alumni_profiles',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('profile_picture_filename', sa.String(length=255), nullable=True),
+    sa.Column('curriculum_vitae_filename', sa.String(length=255), nullable=True),
+    sa.Column('dean_approval_status', sa.Enum('PENDING', 'APPROVED', 'REJECTED', name='alumniapprovalstatus'), nullable=False),
+    sa.Column('employment_status', sa.Enum('EMPLOYED', 'UNEMPLOYED', 'SELF_EMPLOYED', name='alumniemploymentstatus'), nullable=False),
+    sa.Column('name_extension', sa.String(length=15), nullable=True),
+    sa.Column('first_name', sa.String(length=255), nullable=False),
+    sa.Column('middle_name', sa.String(length=255), nullable=True),
+    sa.Column('last_name', sa.String(length=255), nullable=False),
+    sa.Column('year_graduated', sa.Integer(), nullable=False),
+    sa.Column('address', sa.String(length=515), nullable=False),
+    sa.Column('phone_number', sa.String(length=15), nullable=False),
+    sa.Column('course_id', sa.Integer(), nullable=True),
+    sa.Column('account_id', sa.Integer(), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
+    sa.ForeignKeyConstraint(['account_id'], ['accounts.id'], ),
+    sa.ForeignKeyConstraint(['course_id'], ['courses.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('account_id')
+    )
+    op.create_index(op.f('ix_alumni_profiles_id'), 'alumni_profiles', ['id'], unique=False)
+    op.create_table('graduate_records',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('record_filename', sa.String(length=255), nullable=False),
+    sa.Column('is_archived', sa.Boolean(), nullable=False),
+    sa.Column('graduation_year', sa.Integer(), nullable=False),
+    sa.Column('course_id', sa.Integer(), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
+    sa.ForeignKeyConstraint(['course_id'], ['courses.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('record_filename')
+    )
+    op.create_index(op.f('ix_graduate_records_id'), 'graduate_records', ['id'], unique=False)
     op.create_table('job_posts',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(length=255), nullable=False),
+    sa.Column('normalized_title', sa.String(length=255), nullable=False),
     sa.Column('description', sa.Text(), nullable=False),
     sa.Column('requirements', sa.Text(), nullable=False),
     sa.Column('responsibilities', sa.Text(), nullable=False),
@@ -201,6 +212,28 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_job_posts_id'), 'job_posts', ['id'], unique=False)
+    op.create_table('job_post_course',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('job_post_id', sa.Integer(), nullable=True),
+    sa.Column('job_post_course_id', sa.Integer(), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
+    sa.ForeignKeyConstraint(['job_post_course_id'], ['courses.id'], ),
+    sa.ForeignKeyConstraint(['job_post_id'], ['job_posts.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_job_post_course_id'), 'job_post_course', ['id'], unique=False)
+    op.create_table('job_post_likes',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('job_post_id', sa.Integer(), nullable=True),
+    sa.Column('alumni_profile_id', sa.Integer(), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
+    sa.ForeignKeyConstraint(['alumni_profile_id'], ['alumni_profiles.id'], ),
+    sa.ForeignKeyConstraint(['job_post_id'], ['job_posts.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_job_post_likes_id'), 'job_post_likes', ['id'], unique=False)
     op.create_table('occupation_states',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('location', sa.String(length=1025), nullable=False),
@@ -225,53 +258,44 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_socials_id'), 'socials', ['id'], unique=False)
-    op.create_table('job_post_likes',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('job_post_id', sa.Integer(), nullable=True),
-    sa.Column('alumni_profile_id', sa.Integer(), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.ForeignKeyConstraint(['alumni_profile_id'], ['alumni_profiles.id'], ),
-    sa.ForeignKeyConstraint(['job_post_id'], ['job_posts.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_job_post_likes_id'), 'job_post_likes', ['id'], unique=False)
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     """Downgrade schema."""
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_index(op.f('ix_job_post_likes_id'), table_name='job_post_likes')
-    op.drop_table('job_post_likes')
     op.drop_index(op.f('ix_socials_id'), table_name='socials')
     op.drop_table('socials')
     op.drop_index(op.f('ix_occupation_states_id'), table_name='occupation_states')
     op.drop_table('occupation_states')
+    op.drop_index(op.f('ix_job_post_likes_id'), table_name='job_post_likes')
+    op.drop_table('job_post_likes')
+    op.drop_index(op.f('ix_job_post_course_id'), table_name='job_post_course')
+    op.drop_table('job_post_course')
     op.drop_index(op.f('ix_job_posts_id'), table_name='job_posts')
     op.drop_table('job_posts')
-    op.drop_index(op.f('ix_system_admin_profiles_id'), table_name='system_admin_profiles')
-    op.drop_table('system_admin_profiles')
-    op.drop_index(op.f('ix_peso_staff_profiles_id'), table_name='peso_staff_profiles')
-    op.drop_table('peso_staff_profiles')
     op.drop_index(op.f('ix_graduate_records_id'), table_name='graduate_records')
     op.drop_table('graduate_records')
-    op.drop_index(op.f('ix_dean_profiles_id'), table_name='dean_profiles')
-    op.drop_table('dean_profiles')
-    op.drop_index(op.f('ix_company_profiles_id'), table_name='company_profiles')
-    op.drop_table('company_profiles')
-    op.drop_index(op.f('ix_audit_logs_id'), table_name='audit_logs')
-    op.drop_table('audit_logs')
     op.drop_index(op.f('ix_alumni_profiles_id'), table_name='alumni_profiles')
     op.drop_table('alumni_profiles')
     op.drop_index(op.f('ix_aligned_occupations_id'), table_name='aligned_occupations')
     op.drop_table('aligned_occupations')
+    op.drop_index(op.f('ix_system_admin_profiles_id'), table_name='system_admin_profiles')
+    op.drop_table('system_admin_profiles')
+    op.drop_index(op.f('ix_peso_staff_profiles_id'), table_name='peso_staff_profiles')
+    op.drop_table('peso_staff_profiles')
+    op.drop_index(op.f('ix_dean_profiles_id'), table_name='dean_profiles')
+    op.drop_table('dean_profiles')
+    op.drop_index(op.f('ix_courses_id'), table_name='courses')
+    op.drop_table('courses')
+    op.drop_index(op.f('ix_company_profiles_id'), table_name='company_profiles')
+    op.drop_table('company_profiles')
+    op.drop_index(op.f('ix_audit_logs_id'), table_name='audit_logs')
+    op.drop_table('audit_logs')
     op.drop_index(op.f('ix_schools_id'), table_name='schools')
     op.drop_table('schools')
     op.drop_index(op.f('ix_occupations_id'), table_name='occupations')
     op.drop_table('occupations')
-    op.drop_index(op.f('ix_courses_id'), table_name='courses')
-    op.drop_table('courses')
     op.drop_index(op.f('ix_accounts_id'), table_name='accounts')
     op.drop_index(op.f('ix_accounts_email'), table_name='accounts')
     op.drop_table('accounts')
