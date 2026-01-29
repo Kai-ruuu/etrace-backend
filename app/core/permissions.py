@@ -67,7 +67,7 @@ class Permissions:
             case AccountRole.ALUMNI:
                 self.actions.update({
                     Action.READ_JOB_POSTS,
-                    Action.LIKE_JOB_POSTS,
+                    Action.LIKE_DISLIKE_JOB_POSTS,
                 })
 
     

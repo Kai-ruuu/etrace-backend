@@ -107,6 +107,13 @@ JOB_POST_ARCHIVE_PUBLISHED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "
 
 UNABLE_TO_CREATE_JOB_POST_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to create job post.")
 
+JOB_POST_LIKE_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "You have not liked the job post.")
+
+JOB_POST_UNABLE_TO_LIKE_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to like the job post.")
+
+JOB_POST_UNABLE_TO_DISLIKE_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to unlike the job post.")
+
+
 def RAISE_FILE_CANNOT_BE_READ_EXCEPTION(file_field: str) -> None:
     raise HTTPException(
         status.HTTP_422_UNPROCESSABLE_CONTENT,

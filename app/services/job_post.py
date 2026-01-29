@@ -1,5 +1,4 @@
-from fastapi import UploadFile, Form, File
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.utils.logging import Logger
@@ -8,10 +7,12 @@ from app.core.exceptions import *
 from app.core.enums import Action, AccountRole
 from app.models.account import Account
 from app.models.job_post import JobPost
+from app.models.job_post_like import JobPostLike
 from app.models.job_post_course import JobPostCourse
 from app.repositories.course import CourseRepository
 from app.repositories.profile import ProfileRepository
 from app.repositories.job_post import JobPostRepository
+from app.repositories.job_post_like import JobPostLikeRepository
 from app.repositories.job_post_course import JobPostCourseCourseRepository
 
 
@@ -20,6 +21,7 @@ class JobPostService:
         self.db = db
         self.course_repo = CourseRepository(self.db)
         self.job_post_repo = JobPostRepository(self.db)
+        self.job_post_like_repo = JobPostLikeRepository(self.db)
         self.job_post_course_repo = JobPostCourseCourseRepository(self.db)
         self.alumni_profile_repo = ProfileRepository(self.db, AccountRole.ALUMNI)
         self.company_profile_repo = ProfileRepository(self.db, AccountRole.COMPANY)
@@ -185,6 +187,7 @@ class JobPostService:
         if not db_job_post.is_published:
             raise JOB_POST_ALREADY_UNPUBLISHED_EXCEPTION
         
+        # [mark] delete job post likes
         db_job_post = await self.job_post_repo.unpublish(db_job_post)
         
         return JobPostOut.model_validate(db_job_post) if as_pymodel else db_job_post
@@ -207,3 +210,50 @@ class JobPostService:
         db_job_post = await self.job_post_repo.publish(db_job_post)
         
         return JobPostOut.model_validate(db_job_post) if as_pymodel else db_job_post
+    
+
+    async def dislike(self, user: Account, job_post_id: int, as_pymodel: bool = False) -> JobPost | JobPostOut:
+        user.permissions.raise_unauthorized_if_excludes(Action.LIKE_DISLIKE_JOB_POSTS)
+
+        db_job_post = await self.job_post_repo.get_by_id(job_post_id)
+
+        if not db_job_post:
+            raise JOB_POST_NOT_FOUND_EXCEPTION
+        
+        db_alumni_profile = await self.alumni_profile_repo.get_by_account_id(user.id)
+        db_job_post_like = await self.job_post_like_repo.get_by_job_post_and_alumni_id(job_post_id, db_alumni_profile.id)
+        
+        if not db_job_post_like:
+            raise JOB_POST_LIKE_NOT_FOUND_EXCEPTION
+        
+        try:
+            await self.job_post_like_repo.delete(db_job_post_like)
+            await self.db.commit()
+            return JobPostOut.model_validate(db_job_post) if as_pymodel else db_job_post
+        except SQLAlchemyError as e:
+            await self.db.rollback()
+            Logger.error(f"Unable to dislike job post. - {repr(e)}")
+            raise JOB_POST_UNABLE_TO_DISLIKE_EXCEPTION
+    
+
+    async def like(self, user: Account, job_post_id: int, as_pymodel: bool = False) -> JobPost | JobPostOut:
+        user.permissions.raise_unauthorized_if_excludes(Action.LIKE_DISLIKE_JOB_POSTS)
+
+        db_job_post = await self.job_post_repo.get_by_id(job_post_id)
+
+        if not db_job_post:
+            raise JOB_POST_NOT_FOUND_EXCEPTION
+        
+        db_alumni_profile = await self.alumni_profile_repo.get_by_account_id(user.id)
+        
+        try:
+            await self.job_post_like_repo.create(JobPostLike(
+                job_post_id=job_post_id,
+                alumni_profile_id=db_alumni_profile.id
+            ))
+            await self.db.commit()
+            return JobPostOut.model_validate(db_job_post) if as_pymodel else db_job_post
+        except SQLAlchemyError as e:
+            await self.db.rollback()
+            Logger.error(f"Unable to like job post. - {repr(e)}")
+            raise JOB_POST_UNABLE_TO_DISLIKE_EXCEPTION
