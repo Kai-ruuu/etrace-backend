@@ -77,7 +77,7 @@ async def restore(
 
 @router.patch("/{id}/unpublish", response_model=JobPostOut)
 @limiter.limit("10/minute")
-async def archive(
+async def unpublish(
     request: Request,
     id: int,
     db: AsyncSession = Depends(get_db),
@@ -89,7 +89,7 @@ async def archive(
 
 @router.patch("/{id}/publish", response_model=JobPostOut)
 @limiter.limit("10/minute")
-async def restore(
+async def publish(
     request: Request,
     id: int,
     db: AsyncSession = Depends(get_db),
@@ -97,3 +97,27 @@ async def restore(
 ) -> JobPostOut:
     service = JobPostService(db)
     return await service.publish_by_id(user, id, True)
+
+
+@router.patch("/{id}/dislike", response_model=JobPostOut)
+@limiter.limit("10/minute")
+async def dislike(
+    request: Request,
+    id: int,
+    db: AsyncSession = Depends(get_db),
+    user: Account = Depends(allow_roles([AccountRole.ALUMNI])),
+) -> JobPostOut:
+    service = JobPostService(db)
+    return await service.dislike(user, id, True)
+
+
+@router.patch("/{id}/like", response_model=JobPostOut)
+@limiter.limit("10/minute")
+async def like(
+    request: Request,
+    id: int,
+    db: AsyncSession = Depends(get_db),
+    user: Account = Depends(allow_roles([AccountRole.ALUMNI])),
+) -> JobPostOut:
+    service = JobPostService(db)
+    return await service.like(user, id, True)

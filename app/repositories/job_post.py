@@ -20,7 +20,14 @@ class JobPostRepository:
         
     
     async def get_by_id(self, id: int) -> JobPost | None:
-        statement = select(JobPost).where(JobPost.id == id)
+        statement = (
+            select(JobPost)
+            .where(JobPost.id == id)
+            .options(
+                selectinload(JobPost.company),
+                selectinload(JobPost.job_post_courses)
+            )
+        )
         result = await self.db.execute(statement)
         return result.scalar_one_or_none()
     

@@ -10,17 +10,16 @@ class JobPostCourseCourseRepository:
         self.db = db
     
     
-    async def create(self, job_post: JobPostCourse) -> JobPostCourse:
-        self.db.add(job_post)
+    async def create(self, job_post_course: JobPostCourse) -> JobPostCourse:
+        self.db.add(job_post_course)
         await self.db.flush()
-        await self.db.refresh(job_post)
-        return job_post
+        await self.db.refresh(job_post_course)
+        return job_post_course
         
     
     async def get_by_id(self, id: int) -> JobPostCourse | None:
         statement = select(JobPostCourse).where(JobPostCourse.id == id)
-        result = await self.db.execute(statement)
-        return result.scalar_one_or_none()
+        return (await self.db.execute(statement)).scalar_one_or_none()
     
 
     # [mark] add delete feature

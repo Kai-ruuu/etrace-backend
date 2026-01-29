@@ -31,7 +31,7 @@ class Action(StrEnum):
     ARCHIVE_RESTORE_GRADUATE_RECORDS = auto()
     CREATE_JOB_POSTS = auto()
     READ_JOB_POSTS = auto()
-    LIKE_JOB_POSTS = auto()
+    LIKE_DISLIKE_JOB_POSTS = auto()
     ARCHIVE_RESTORE_JOB_POSTS = auto()
     PUBLISH_UNPUBLISH_JOB_POSTS = auto()
 
