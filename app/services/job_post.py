@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.utils.logging import Logger
 from app.schemas.job_post import JobPostIn, JobPostOut
 from app.core.exceptions import *
-from app.core.enums import Action, AccountRole
+from app.core.enums import Action, AccountRole, CompanyApprovalStatus
 from app.models.account import Account
 from app.models.job_post import JobPost
 from app.models.job_post_like import JobPostLike
@@ -46,6 +46,12 @@ class JobPostService:
 
             if not db_company_profile:
                 raise COMPANY_PROFILE_NOT_FOUND_EXCEPTION
+            
+            if (
+                not db_company_profile.sysad_approval_status == CompanyApprovalStatus.APPROVED or
+                not db_company_profile.peso_staff_approval_status == CompanyApprovalStatus.APPROVED
+            ):
+                raise COMPANY_NOT_FULLY_APPROVED_EXCEPTION
             
             # verify if all courses exists with the provided target course ids
             all_courses_exists, missing_ids = await self.course_repo.get_batch_exists(job_post.target_courses_ids)

@@ -113,6 +113,7 @@ JOB_POST_UNABLE_TO_LIKE_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVE
 
 JOB_POST_UNABLE_TO_DISLIKE_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to unlike the job post.")
 
+COMPANY_NOT_FULLY_APPROVED_EXCEPTION = HTTPException(status.HTTP_403_FORBIDDEN, "You should be approved by both the System Administrator and PESO Staff before posting a job.")
 
 def RAISE_FILE_CANNOT_BE_READ_EXCEPTION(file_field: str) -> None:
     raise HTTPException(
