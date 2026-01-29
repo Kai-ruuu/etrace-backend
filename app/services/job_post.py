@@ -21,6 +21,7 @@ class JobPostService:
         self.course_repo = CourseRepository(self.db)
         self.job_post_repo = JobPostRepository(self.db)
         self.job_post_course_repo = JobPostCourseCourseRepository(self.db)
+        self.alumni_profile_repo = ProfileRepository(self.db, AccountRole.ALUMNI)
         self.company_profile_repo = ProfileRepository(self.db, AccountRole.COMPANY)
 
 
@@ -98,12 +99,31 @@ class JobPostService:
         return JobPostOut.model_validate(db_job_post) if as_pymodel else db_job_post
 
     
+    async def get_by_latest(self, user: Account, page: int = 1, page_size: int = 20) -> dict:
+        user.permissions.raise_unauthorized_if_excludes(Action.READ_JOB_POSTS)
+
+        db_alumni_profile = await self.alumni_profile_repo.get_by_account_id(user.id)
+        job_posts, total, total_pages = await self.job_post_repo.get_by_latest(db_alumni_profile.course_id, page, page_size)
+
+        items = [JobPostOut.model_validate(job_post) for job_post in job_posts]
+
+        return {
+            "items": items,
+            "total": total,
+            "total_pages": total_pages,
+            "page": page,
+            "page_size": page_size,
+            "has_next": page < total_pages,
+            "has_prev": page > 1
+        }
+
+    
     async def search(self, user: Account, query: str, page: int = 1, page_size: int = 20) -> dict:
         user.permissions.raise_unauthorized_if_excludes(Action.READ_JOB_POSTS)
         
-        schools, total, total_pages = await self.job_post_repo.search(query, page,  page_size)
+        job_posts, total, total_pages = await self.job_post_repo.search(query, page,  page_size)
 
-        items = [JobPostOut.model_validate(school) for school in schools]
+        items = [JobPostOut.model_validate(job_post) for job_post in job_posts]
 
         return {
             "items": items,

@@ -1,8 +1,10 @@
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, or_, cast, String
+from sqlalchemy import select, func, or_, and_, cast, String
 
+from app.utils.datetime import get_utc_now
 from app.models.job_post import JobPost
+from app.models.job_post_course import JobPostCourse
 
 
 class JobPostRepository:
@@ -43,6 +45,45 @@ class JobPostRepository:
         )
         result = await self.db.execute(statement)
         return result.scalars().all()
+    
+    
+    # [mark] primarily used by alumni
+    async def get_by_latest(self, user_course_id: int, page: int = 1, page_size: int = 20) -> tuple[list[JobPost], int, int]:
+        search_filter = and_(
+            JobPost.is_archived.is_(False),
+            JobPost.is_published.is_(True),
+            JobPostCourse.job_post_course_id == user_course_id
+        )
+
+        base_statement = (
+            select(JobPost)
+            .options(
+                selectinload(JobPost.company),
+                selectinload(JobPost.job_post_courses),
+            )
+            .join(JobPost.job_post_courses)
+            .where(search_filter)
+            .order_by(JobPost.posted_at.desc())
+        )
+
+        count_statement = (
+            select(func.count(func.distinct(JobPost.id)))
+            .select_from(JobPost)
+            .join(JobPost.job_post_courses)
+            .where(search_filter)
+        )
+
+        total = (await self.db.execute(count_statement)).scalar()
+        total_pages = (total + page_size - 1) // page_size
+
+        result = await self.db.execute(
+            base_statement
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+
+        job_posts = result.scalars().unique().all()
+        return job_posts, total, total_pages
     
 
     async def search(self, query: str | None = None, page: int = 1, page_size: int = 20) -> tuple[list[JobPost], int, int]:
@@ -99,6 +140,7 @@ class JobPostRepository:
 
     async def publish(self, db_job_post: JobPost) -> JobPost:
         db_job_post.is_published = True
+        db_job_post.posted_at = get_utc_now()
         await self.db.commit()
         await self.db.refresh(db_job_post, attribute_names=["company", "job_post_courses"])
         return db_job_post

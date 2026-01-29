@@ -64,6 +64,11 @@ class Permissions:
                     Action.ARCHIVE_RESTORE_JOB_POSTS,
                     Action.PUBLISH_UNPUBLISH_JOB_POSTS,
                 })
+            case AccountRole.ALUMNI:
+                self.actions.update({
+                    Action.READ_JOB_POSTS,
+                    Action.LIKE_JOB_POSTS,
+                })
 
     
     def can(self, action: Action) -> bool:
