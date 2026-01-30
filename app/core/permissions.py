@@ -63,11 +63,14 @@ class Permissions:
                     Action.READ_JOB_POSTS,
                     Action.ARCHIVE_RESTORE_JOB_POSTS,
                     Action.PUBLISH_UNPUBLISH_JOB_POSTS,
+                    Action.READ_JOB_POST_INTERESTS,
+                    Action.REVIEW_UNREVIEW_JOB_POST_INTERESTS,
                 })
             case AccountRole.ALUMNI:
                 self.actions.update({
                     Action.READ_JOB_POSTS,
-                    Action.LIKE_DISLIKE_JOB_POSTS,
+                    Action.INTERACT_WITH_JOB_POSTS,
+                    Action.READ_JOB_POST_INTERESTS,
                 })
 
     

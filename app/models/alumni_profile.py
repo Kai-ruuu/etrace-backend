@@ -18,6 +18,7 @@ class AlumniProfile(Base):
     middle_name: Mapped[str | None] = Column(String(255), nullable=True, default=None)
     last_name: Mapped[str] = Column(String(255), nullable=False)
     job_post_likes: Mapped[list["JobPostLike"]] = relationship("JobPostLike", back_populates="alumni", uselist=True, cascade="all, delete-orphan") # type: ignore
+    job_post_interests: Mapped[list["JobPostInterest"]] = relationship("JobPostInterest", back_populates="alumni", uselist=True, cascade="all, delete-orphan") # type: ignore
     year_graduated: Mapped[int] = Column(Integer, nullable=False)
     occupation_states: Mapped[list["OccupationState"]] = relationship("OccupationState", back_populates="alumni", uselist=True, cascade="all, delete-orphan") # type: ignore
     address: Mapped[str] = Column(String(515), nullable=False)

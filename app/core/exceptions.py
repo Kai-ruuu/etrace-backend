@@ -113,6 +113,16 @@ JOB_POST_UNABLE_TO_LIKE_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVE
 
 JOB_POST_UNABLE_TO_DISLIKE_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to unlike the job post.")
 
+JOB_POST_UNABLE_TO_SEND_CV_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to send CV.")
+
+JOB_POST_CV_ALREADY_SENT_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Your CV is already sent.")
+
+JOB_POST_CV_SENDER_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "CV sender not found.")
+
+JOB_POST_INTEREST_CV_ALREADY_REVIEWED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "CV is already reviewed.")
+
+JOB_POST_INTEREST_CV_ALREADY_NOT_REVIEWED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "CV is already marked as not reviwed.")
+
 COMPANY_NOT_FULLY_APPROVED_EXCEPTION = HTTPException(status.HTTP_403_FORBIDDEN, "You should be approved by both the System Administrator and PESO Staff before posting a job.")
 
 def RAISE_FILE_CANNOT_BE_READ_EXCEPTION(file_field: str) -> None:

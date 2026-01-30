@@ -3,13 +3,15 @@ from fastapi import Request, Query, Depends, APIRouter
 
 from app.models.account import Account
 from app.utils.rate_limiting import limiter
-from app.services.job_post import JobPostService
 from app.core.enums import AccountRole
-from app.schemas.job_post import JobPostIn, JobPostOut
 from app.core.dependencies import get_db, allow_roles
+from app.services.job_post import JobPostService
+from app.services.job_post_interest import JobPostInterestService
+from app.schemas.job_post import JobPostIn, JobPostOut
+from app.schemas.job_post_interest import JobPostInterestAlumniListOut, JobPostInterestCompanyListOut
 
 
-router = APIRouter(tags=["job-post"], prefix="/api/v1/user/job_post")
+router = APIRouter(tags=["job-post"], prefix="/api/v1/user/job-post")
 
 
 @router.get("/")
@@ -99,7 +101,7 @@ async def publish(
     return await service.publish_by_id(user, id, True)
 
 
-@router.patch("/{id}/dislike", response_model=JobPostOut)
+@router.delete("/{id}/dislike", response_model=JobPostOut)
 @limiter.limit("10/minute")
 async def dislike(
     request: Request,
@@ -111,7 +113,7 @@ async def dislike(
     return await service.dislike(user, id, True)
 
 
-@router.patch("/{id}/like", response_model=JobPostOut)
+@router.post("/{id}/like", response_model=JobPostOut)
 @limiter.limit("10/minute")
 async def like(
     request: Request,
@@ -121,3 +123,42 @@ async def like(
 ) -> JobPostOut:
     service = JobPostService(db)
     return await service.like(user, id, True)
+
+
+@router.post("/{id}/send-cv", response_model=JobPostOut)
+@limiter.limit("10/minute")
+async def send_cv(
+    request: Request,
+    id: int,
+    db: AsyncSession = Depends(get_db),
+    user: Account = Depends(allow_roles([AccountRole.ALUMNI])),
+) -> JobPostOut:
+    service = JobPostService(db)
+    return await service.send_cv(user, id, True)
+
+
+@router.get("/{id}/get-interested")
+@limiter.limit("10/minute")
+async def get_interested(
+    request: Request,
+    id: int,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=20, le=100),
+    db: AsyncSession = Depends(get_db),
+    user: Account = Depends(allow_roles([AccountRole.COMPANY])),
+) -> dict:
+    service = JobPostInterestService(db)
+    return await service.get_company_list(user, id, page, page_size)
+
+
+@router.get("/{id}/get-interests")
+@limiter.limit("10/minute")
+async def get_interests(
+    request: Request,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=20, le=100),
+    db: AsyncSession = Depends(get_db),
+    user: Account = Depends(allow_roles([AccountRole.ALUMNI])),
+) -> dict:
+    service = JobPostInterestService(db)
+    return await service.get_alumni_list(user, page, page_size)
