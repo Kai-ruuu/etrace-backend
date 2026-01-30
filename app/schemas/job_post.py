@@ -32,4 +32,7 @@ class JobPostOut(JobPostBase):
     company: CompanyProfileOut
     job_post_course: list[CourseOut] = []
     company_profile_id: int
+    posted_at: datetime | None
+    created_at: datetime
+    updated_at: datetime
     model_config = {"from_attributes": True}

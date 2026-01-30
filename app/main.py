@@ -8,11 +8,12 @@ from app.api import alumni
 from app.api import school
 from app.api import course
 from app.api import company
-from app.api import job_post
 from app.api import peso_staff
 from app.api import system_admin
 from app.api import authentication
 from app.api import graduate_record
+from app.api import job_post
+from app.api import job_post_interest
 from app.utils.setup import lifespan
 from app.utils.rate_limiting import limiter
 
@@ -30,4 +31,5 @@ app.include_router(graduate_record.router)
 app.include_router(peso_staff.router)
 app.include_router(company.router)
 app.include_router(job_post.router)
+app.include_router(job_post_interest.router)
 app.include_router(alumni.router)

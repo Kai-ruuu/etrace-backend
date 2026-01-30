@@ -26,6 +26,7 @@ class JobPost(Base):
     company_profile_id: Mapped[int] = Column(Integer, ForeignKey("company_profiles.id"), nullable=False)
     company: Mapped["CompanyProfile"] = relationship("CompanyProfile", back_populates="job_posts") # type: ignore
     job_post_likes: Mapped[list["JobPostLike"]] = relationship("JobPostLike", back_populates="job_post") # type: ignore
+    job_post_interests: Mapped[list["JobPostInterest"]] = relationship("JobPostInterest", back_populates="job_post") # type: ignore
     job_post_courses: Mapped[list["JobPostCourse"]] = relationship("JobPostCourse", back_populates="job_post") # type: ignore
     posted_at: Mapped[datetime] = Column(DateTime(timezone=True), nullable=True)
     expires_at: Mapped[datetime] = Column(DateTime(timezone=True), nullable=True)

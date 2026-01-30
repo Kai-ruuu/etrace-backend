@@ -5,6 +5,7 @@ from sqlalchemy import select, func, or_, and_, cast, String
 from app.utils.datetime import get_utc_now
 from app.models.job_post import JobPost
 from app.models.job_post_course import JobPostCourse
+from app.models.company_profile import CompanyProfile
 
 
 class JobPostRepository:
@@ -30,6 +31,17 @@ class JobPostRepository:
         )
         result = await self.db.execute(statement)
         return result.scalar_one_or_none()
+    
+    
+    async def get_by_id_and_company_id(self, id: int, company_id: int) -> bool:
+        statement = (
+            select(JobPost)
+            .where(
+                JobPost.id == id,
+                JobPost.company_profile_id == company_id
+            )
+        )
+        return (await self.db.execute(statement)).scalar_one_or_none()
     
 
     # [mark] for existence check only
