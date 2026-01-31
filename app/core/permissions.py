@@ -26,6 +26,7 @@ class Permissions:
                     Action.ENABLE_DISABLE_COMPANIES,
                     # [mark] review if appropriate
                     Action.READ_COURSES,
+                    Action.UPDATE_DEAN_SCHOOL
                 })
                 
                 if self._is_default_sysad:

@@ -49,8 +49,3 @@ class AccountService:
             case AccountRole.ALUMNI: return AlumniAccountOut
             case AccountRole.DEAN: return DeanAccountOut
             case _: raise ValueError("Invalid role value.")
-        
-
-# continue on:
-# [x] password change feature
-# [x] profile management feature

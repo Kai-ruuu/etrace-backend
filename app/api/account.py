@@ -15,7 +15,7 @@ from app.schemas.account import (
 )
 
 
-router = APIRouter(tags=["account"], prefix="/api/v1/account")
+router = APIRouter(tags=["account"], prefix="/api/v1/user/account")
 
 
 @router.patch("/change-password")

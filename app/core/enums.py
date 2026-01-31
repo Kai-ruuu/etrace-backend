@@ -37,6 +37,7 @@ class Action(StrEnum):
     READ_JOB_POST_INTERESTS = auto()
     REVIEW_UNREVIEW_JOB_POST_INTERESTS = auto()
     GET_ALUMNI_LOCATION_INFO = auto()
+    UPDATE_DEAN_SCHOOL = auto()
 
 
 class AccountRole(StrEnum):

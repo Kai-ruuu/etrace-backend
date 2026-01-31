@@ -6,7 +6,10 @@ class DeanProfileBase(BaseModel):
     first_name: str
     middle_name: str | None = None
     last_name: str
-    model_config = {"from_attributes": True}
+    
+    
+class DeanProfileIn(DeanProfileBase):
+    pass
 
 
 class DeanProfileOut(DeanProfileBase):
