@@ -1,11 +1,16 @@
 from datetime import datetime
 from pydantic import BaseModel
 
+
 class PesoStaffProfileBase(BaseModel):
     first_name: str
     middle_name: str | None = None
     last_name: str
-    model_config = {"from_attributes": True}
+
+
+class PesoStaffProfileIn(PesoStaffProfileBase):
+    pass
+    
 
 class PesoStaffProfileOut(PesoStaffProfileBase):
     id: int

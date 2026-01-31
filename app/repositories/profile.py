@@ -1,13 +1,19 @@
+from sqlalchemy import select, update
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_, func, literal
 
 from app.core.enums import AccountRole, CompanyApprovalStatus, AlumniApprovalStatus
-from app.schemas.dean_profile import DeanProfileOut
+from app.schemas.dean_profile import (
+    DeanProfileIn,
+    DeanProfileOut
+)
 from app.schemas.alumni_profile import AlumniProfileOut
 from app.schemas.company_profile import CompanyProfileOut
 from app.schemas.peso_staff_profile import PesoStaffProfileOut
-from app.schemas.system_admin_profile import SystemAdminProfileOut
+from app.schemas.system_admin_profile import (
+    SystemAdminProfileOut,
+    SystemAdminProfileIn
+)
 from app.models.account import Account
 from app.models.dean_profile import DeanProfile
 from app.models.alumni_profile import AlumniProfile
@@ -46,20 +52,14 @@ class ProfileRepository:
     
     async def get_by_id(
         self,
-        id: int,
-        as_pymodel: bool = False
+        id: int
     ) -> (
         None |
         DeanProfile |
         AlumniProfile |
         CompanyProfile |
         PesoStaffProfile |
-        SystemAdminProfile |
-        DeanProfileOut |
-        AlumniProfileOut |
-        CompanyProfileOut |
-        PesoStaffProfileOut |
-        SystemAdminProfileOut
+        SystemAdminProfile
     ):
         statement = (
             select(self.ProfileModel)
@@ -75,25 +75,19 @@ class ProfileRepository:
         if not profile:
             return None
         
-        return SystemAdminProfileOut.model_validate(profile) if as_pymodel else profile
+        return profile
     
     
     async def get_by_account_id(
         self,
-        account_id: int,
-        as_pymodel: bool = False
+        account_id: int
     ) -> (
         None |
         DeanProfile |
         AlumniProfile |
         CompanyProfile |
         PesoStaffProfile |
-        SystemAdminProfile |
-        DeanProfileOut |
-        AlumniProfileOut |
-        CompanyProfileOut |
-        PesoStaffProfileOut |
-        SystemAdminProfileOut
+        SystemAdminProfile
     ):
         statement = (
             select(self.ProfileModel)
@@ -109,89 +103,126 @@ class ProfileRepository:
         if not profile:
             return None
         
-        return self.ProfilePymodel.model_validate(profile) if as_pymodel else profile
+        return profile
     
     
-    async def approve_company_as_system_admin_by_account_id(self, account_id: int, as_pymodel: bool = False) -> CompanyProfile | CompanyProfileOut:
+    async def approve_company_as_system_admin_by_account_id(
+        self,
+        account_id: int
+    ) -> CompanyProfile:
         db_profile = await self.get_by_account_id(account_id, False)
         db_profile.sysad_approval_status = CompanyApprovalStatus.APPROVED
         
         await self.db.commit()
         await self.db.refresh(db_profile)
-        return CompanyProfileOut.model_validate(db_profile) if as_pymodel else db_profile
+        return db_profile
     
     
-    async def reject_company_as_system_admin_by_account_id(self, account_id: int, as_pymodel: bool = False) -> CompanyProfile | CompanyProfileOut:
+    async def reject_company_as_system_admin_by_account_id(self, account_id: int) -> CompanyProfile:
         db_profile = await self.get_by_account_id(account_id, False)
         db_profile.sysad_approval_status = CompanyApprovalStatus.REJECTED
         
         await self.db.commit()
         await self.db.refresh(db_profile)
-        return CompanyProfileOut.model_validate(db_profile) if as_pymodel else db_profile
+        return db_profile
     
     
-    async def pend_company_as_system_admin_by_account_id(self, account_id: int, as_pymodel: bool = False) -> CompanyProfile | CompanyProfileOut:
+    async def pend_company_as_system_admin_by_account_id(self, account_id: int) -> CompanyProfile:
         db_profile = await self.get_by_account_id(account_id, False)
         db_profile.sysad_approval_status = CompanyApprovalStatus.PENDING
         
         await self.db.commit()
         await self.db.refresh(db_profile)
-        return CompanyProfileOut.model_validate(db_profile) if as_pymodel else db_profile
+        return db_profile
     
     
-    async def approve_company_as_peso_staff_by_account_id(self, account_id: int, as_pymodel: bool = False) -> CompanyProfile | CompanyProfileOut:
+    async def approve_company_as_peso_staff_by_account_id(self, account_id: int) -> CompanyProfile:
         db_profile = await self.get_by_account_id(account_id, False)
         db_profile.peso_staff_approval_status = CompanyApprovalStatus.APPROVED
         
         await self.db.commit()
         await self.db.refresh(db_profile)
-        return CompanyProfileOut.model_validate(db_profile) if as_pymodel else db_profile
+        return db_profile
     
     
-    async def reject_company_as_peso_staff_by_account_id(self, account_id: int, as_pymodel: bool = False) -> CompanyProfile | CompanyProfileOut:
+    async def reject_company_as_peso_staff_by_account_id(self, account_id: int) -> CompanyProfile:
         db_profile = await self.get_by_account_id(account_id, False)
         db_profile.peso_staff_approval_status = CompanyApprovalStatus.REJECTED
         
         await self.db.commit()
         await self.db.refresh(db_profile)
-        return CompanyProfileOut.model_validate(db_profile) if as_pymodel else db_profile
+        return db_profile
         
     
-    async def pend_company_as_peso_staff_by_account_id(self, account_id: int, as_pymodel: bool = False) -> CompanyProfile | CompanyProfileOut:
+    async def pend_company_as_peso_staff_by_account_id(self, account_id: int) -> CompanyProfile:
         db_profile = await self.get_by_account_id(account_id, False)
         db_profile.peso_staff_approval_status = CompanyApprovalStatus.PENDING
         
         await self.db.commit()
         await self.db.refresh(db_profile)
-        return CompanyProfileOut.model_validate(db_profile) if as_pymodel else db_profile
+        return db_profile
     
     
-    async def approve_alumni(self, account_id: int, as_pymodel: bool = False) -> AlumniProfile | AlumniProfileOut:
+    async def approve_alumni(self, account_id: int) -> AlumniProfile:
         db_profile = await self.get_by_account_id(account_id, False)
         db_profile.dean_approval_status = AlumniApprovalStatus.APPROVED
         
         await self.db.commit()
         await self.db.refresh(db_profile)
-        return AlumniProfileOut.model_validate(db_profile) if as_pymodel else db_profile
+        return db_profile
     
     
-    async def reject_alumni(self, account_id: int, as_pymodel: bool = False) -> AlumniProfile | AlumniProfileOut:
+    async def reject_alumni(self, account_id: int) -> AlumniProfile:
         db_profile = await self.get_by_account_id(account_id, False)
         db_profile.dean_approval_status = AlumniApprovalStatus.REJECTED
         
         await self.db.commit()
         await self.db.refresh(db_profile)
-        return AlumniProfileOut.model_validate(db_profile) if as_pymodel else db_profile
+        return db_profile
     
     
-    async def pend_alumni(self, account_id: int, as_pymodel: bool = False) -> AlumniProfile | AlumniProfileOut:
+    async def pend_alumni(self, account_id: int) -> AlumniProfile:
         db_profile = await self.get_by_account_id(account_id, False)
         db_profile.dean_approval_status = AlumniApprovalStatus.PENDING
         
         await self.db.commit()
         await self.db.refresh(db_profile)
-        return AlumniProfileOut.model_validate(db_profile) if as_pymodel else db_profile
+        return db_profile
 
+
+    async def update_as_admin_by_id(
+        self,
+        profile_id: int,
+        profile: SystemAdminProfileIn | DeanProfileIn,
+    ) -> (
+        SystemAdminProfile |
+        DeanProfile
+    ):
+        statement = (
+            update(self.ProfileModel)
+            .where(self.ProfileModel.id == profile_id)
+            .values(**profile.model_dump(exclude_unset=True))
+        )
+
+        await self.db.execute(statement)
+        await self.db.commit()
+        return await self.get_by_id(profile_id)
+    
+    
+    async def update_dean_school_by_id(
+        self,
+        profile_id: int,
+        school_id: int
+    ) -> DeanProfile:
+        statement = (
+            update(DeanProfile)
+            .where(DeanProfile.id == profile_id)
+            .values({"school_id": school_id})
+        )
+        await self.db.execute(statement)
+        await self.db.commit()
+        return await self.get_by_id(profile_id)
+    
     
     @property
     def ProfileModel(self):

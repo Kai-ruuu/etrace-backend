@@ -3,10 +3,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.account import Account
 from app.utils.rate_limiting import limiter
-from app.schemas.account import DeanAccountIn, DeanAccountOut
 from app.core.enums import AccountRole
 from app.core.dependencies import get_db, allow_roles
+from app.schemas.dean_profile import DeanProfileOut
+from app.schemas.account import DeanAccountIn, DeanAccountOut
 from app.services.dean import DeanService
+from app.services.profile import ProfileService
 from app.services.account_provision import AccountProvisionService
 
 
@@ -61,5 +63,18 @@ async def enable(
 ) -> DeanAccountOut:
     service = DeanService(db)
     return await service.enable_by_id(user, id, True)
+
+
+@router.patch("/{id}/update-school/{school_id}", response_model=DeanProfileOut)
+@limiter.limit("10/minute")
+async def update_school(
+    request: Request,
+    id: int,
+    school_id: int,
+    db: AsyncSession = Depends(get_db),
+    user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
+) -> DeanProfileOut:
+    service = ProfileService(db, AccountRole.DEAN)
+    return await service.update_dean_school_by_id(user, id, school_id, True)
 
 

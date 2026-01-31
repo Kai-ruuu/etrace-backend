@@ -12,7 +12,7 @@ class CompanyService:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
         self.account_repo = AccountRepository(self.db, AccountRole.COMPANY)
-        self.profile_repo = ProfileRepository(self.db, AccountRole.COMPANY)
+        self.profile_repo = ProfileRepository(self.db, AccountRol)
     
 
     async def get_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> Account | CompanyAccountOut:
@@ -106,12 +106,12 @@ class CompanyService:
             if db_account.company_profile.sysad_approval_status == CompanyApprovalStatus.APPROVED:
                 raise COMPANY_ALREADY_APPROVED_EXCEPTION
 
-            await self.profile_repo.approve_company_as_system_admin_by_account_id(id, False)
+            await self.profile_repo.approve_company_as_system_admin_by_account_id(id)
         else:
             if db_account.company_profile.peso_staff_approval_status == CompanyApprovalStatus.APPROVED:
                 raise COMPANY_ALREADY_APPROVED_EXCEPTION
 
-            await self.profile_repo.approve_company_as_peso_staff_by_account_id(id, False)
+            await self.profile_repo.approve_company_as_peso_staff_by_account_id(id)
         
         db_account = await self.account_repo.get_by_id(id)
 
@@ -130,12 +130,12 @@ class CompanyService:
             if db_account.company_profile.sysad_approval_status == CompanyApprovalStatus.REJECTED:
                 raise COMPANY_ALREADY_REJECTED_EXCEPTION
 
-            await self.profile_repo.reject_company_as_system_admin_by_account_id(id, False)
+            await self.profile_repo.reject_company_as_system_admin_by_account_id(id)
         else:
             if db_account.company_profile.peso_staff_approval_status == CompanyApprovalStatus.REJECTED:
                 raise COMPANY_ALREADY_REJECTED_EXCEPTION
             
-            await self.profile_repo.reject_company_as_peso_staff_by_account_id(id, False)
+            await self.profile_repo.reject_company_as_peso_staff_by_account_id(id)
         
         db_account = await self.account_repo.get_by_id(id)
 
@@ -154,12 +154,12 @@ class CompanyService:
             if db_account.company_profile.sysad_approval_status == CompanyApprovalStatus.PENDING:
                 raise COMPANY_ALREADY_PENDING_EXCEPTION
 
-            await self.profile_repo.pend_company_as_system_admin_by_account_id(id, False)
+            await self.profile_repo.pend_company_as_system_admin_by_account_id(id)
         else:
             if db_account.company_profile.peso_staff_approval_status == CompanyApprovalStatus.PENDING:
                 raise COMPANY_ALREADY_PENDING_EXCEPTION
             
-            await self.profile_repo.pend_company_as_peso_staff_by_account_id(id, False)
+            await self.profile_repo.pend_company_as_peso_staff_by_account_id(id)
         
         db_account = await self.account_repo.get_by_id(id)
 
