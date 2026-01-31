@@ -5,6 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.models.account import Account
 from app.core.enums import AccountRole
+from app.services.external.geocoding import GeocodingService
 from app.schemas.account import (
     CompanyAccountOut,
     AlumniAccountOut,
@@ -54,13 +55,7 @@ class AuthenticationService:
             token_type="bearer"
         )
     
-    def current_user_to_pymodel(self, user: Account) -> (
-        CompanyAccountOut |
-        AlumniAccountOut |
-        DeanAccountOut |
-        PesoStaffAccountOut |
-        SystemAdminAccountOut
-    ):
+    def current_user_to_pymodel(self, user: Account, geocoding_service: GeocodingService):
         AccountPymodel = AccountRole.ALUMNI
     
         match user.role:
@@ -77,6 +72,10 @@ class AuthenticationService:
             case _:
                 raise ValueError("Invalid role value.")
         
-        return AccountPymodel.model_validate(user)
-
-
+        user_info = AccountPymodel.model_validate(user).model_dump()
+        
+        if user.role == AccountRole.ALUMNI:
+            location_info = geocoding_service.geocode(user_info["alumni_profile"]["address"])
+            user_info["alumni_profile"]["location_info"] = location_info
+        
+        return user_info

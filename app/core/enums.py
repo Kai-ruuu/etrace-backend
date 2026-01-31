@@ -36,6 +36,7 @@ class Action(StrEnum):
     PUBLISH_UNPUBLISH_JOB_POSTS = auto()
     READ_JOB_POST_INTERESTS = auto()
     REVIEW_UNREVIEW_JOB_POST_INTERESTS = auto()
+    GET_ALUMNI_LOCATION_INFO = auto()
 
 
 class AccountRole(StrEnum):

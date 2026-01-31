@@ -1,19 +1,34 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import *
-from app.core.enums import Action, AlumniApprovalStatus
-from app.core.enums import AccountRole
 from app.models.account import Account
 from app.schemas.account import AlumniAccountOut
+from app.services.external.geocoding import GeocodingService
 from app.repositories.account import AccountRepository
 from app.repositories.profile import ProfileRepository
+from app.core.exceptions import *
+from app.core.enums import AccountRole
+from app.core.enums import Action, AlumniApprovalStatus
 
 
-class AlumniService:
+class AlumniService(GeocodingService):
     def __init__(self, db: AsyncSession) -> None:
+        super().__init__()
+        
         self.db = db
         self.account_repo = AccountRepository(self.db, AccountRole.ALUMNI)
         self.profile_repo = ProfileRepository(self.db, AccountRole.ALUMNI)
+    
+    
+    async def get_location_info(self, user: Account, id: int) -> dict:
+        user.permissions.raise_unauthorized_if_excludes(Action.GET_ALUMNI_LOCATION_INFO)
+
+        db_account = await self.account_repo.get_by_id(id)
+
+        if not db_account:
+            raise ACCOUNT_NOT_FOUND_EXCEPTION
+
+        db_alumni_profile = await self.profile_repo.get_by_account_id(id, True)
+        return self.geocode(db_alumni_profile.address)
     
 
     async def get_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> Account | AlumniAccountOut:
