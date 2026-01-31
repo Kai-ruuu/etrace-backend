@@ -15,10 +15,13 @@ from app.schemas.account import (
     SystemAdminAccountOut
 )
 from app.schemas.authentication import Token
+from app.services.external.geocoding import GeocodingService
 from app.services.authentication import AuthenticationService
 from app.services.account_provision import AccountProvisionService
 
+
 router = APIRouter(tags=["all"], prefix="/api/v1/authentication")
+
 
 @router.post("/login", response_model=Token)
 @limiter.limit("10/minute")
@@ -30,21 +33,18 @@ async def login(
     authentication_service = AuthenticationService(db)
     return await authentication_service.authenticate_user(form_data)
 
+
 @router.get("/me")
 @limiter.limit("10/minute")
 async def me(
     request: Request,
     db: AsyncSession=Depends(get_db),
     user: Account = Depends(get_current_user)
-) -> (
-    CompanyAccountOut |
-    AlumniAccountOut |
-    DeanAccountOut |
-    PesoStaffAccountOut |
-    SystemAdminAccountOut
 ):
     authentication_service = AuthenticationService(db)
-    return authentication_service.current_user_to_pymodel(user)
+    geocoding_service = GeocodingService()
+    return authentication_service.current_user_to_pymodel(user, geocoding_service)
+
 
 @router.post("/register/company", response_model=CompanyAccountOut)
 @limiter.limit("10/minute")
@@ -84,6 +84,7 @@ async def register_as_company(
         reg_philjobnet_file,
         True
     )
+
 
 @router.post("/register/alumni", response_model=AlumniAccountOut)
 @limiter.limit("10/minute")

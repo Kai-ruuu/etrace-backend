@@ -47,6 +47,7 @@ class Permissions:
                     Action.CREATE_GRADUATE_RECORDS,
                     Action.READ_GRADUATE_RECORDS,
                     Action.ARCHIVE_RESTORE_GRADUATE_RECORDS,
+                    Action.GET_ALUMNI_LOCATION_INFO
                 })
             case AccountRole.PESO_STAFF:
                 self.actions.update({
@@ -65,12 +66,14 @@ class Permissions:
                     Action.PUBLISH_UNPUBLISH_JOB_POSTS,
                     Action.READ_JOB_POST_INTERESTS,
                     Action.REVIEW_UNREVIEW_JOB_POST_INTERESTS,
+                    Action.GET_ALUMNI_LOCATION_INFO
                 })
             case AccountRole.ALUMNI:
                 self.actions.update({
                     Action.READ_JOB_POSTS,
                     Action.INTERACT_WITH_JOB_POSTS,
                     Action.READ_JOB_POST_INTERESTS,
+                    Action.GET_ALUMNI_LOCATION_INFO
                 })
 
     
