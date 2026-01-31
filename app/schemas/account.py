@@ -65,3 +65,8 @@ class DeanAccountIn(AdminAccountInBase):
 
 class PesoStaffAccountIn(AdminAccountInBase):
     pass
+
+
+class ChangePasswordIn(BaseModel):
+    old_password: str = Field(min_length=8, max_length=65)
+    new_password: str = Field(min_length=8, max_length=65)

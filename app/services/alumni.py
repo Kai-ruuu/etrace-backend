@@ -90,7 +90,6 @@ class AlumniService(GeocodingService):
         return AlumniAccountOut.model_validate(db_account) if as_pymodel else db_account
 
 
-    
     async def enable_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> Account | AlumniAccountOut:
         user.permissions.raise_unauthorized_if_excludes(Action.ENABLE_DISABLE_ALUMNI)
 

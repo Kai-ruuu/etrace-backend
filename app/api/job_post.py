@@ -10,7 +10,7 @@ from app.services.job_post import JobPostService
 from app.services.job_post_interest import JobPostInterestService
 
 
-router = APIRouter(tags=["job-post"], prefix="/api/v1/user/job-post")
+router = APIRouter(tags=["job-post"], prefix="/api/v1/job-post")
 
 
 @router.post("/", response_model=JobPostOut)

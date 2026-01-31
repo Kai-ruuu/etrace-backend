@@ -21,6 +21,8 @@ AUTHENTICATION_INVALID_CREDENTIALS_EXCEPTION = HTTPException(
     headers={"WWW-Authenticate": "Bearer"}
 )
 
+ACCOUNT_CHANGE_PASSWORD_INCORRECT_EXCEPTION = HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect password.")
+
 def RAISE_INVALID_EMAIL_EXCEPTION(error_message: str = "Invalid email format."):
     raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, error_message)
     
