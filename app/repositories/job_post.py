@@ -5,7 +5,6 @@ from sqlalchemy import select, func, or_, and_, cast, String
 from app.utils.datetime import get_utc_now
 from app.models.job_post import JobPost
 from app.models.job_post_course import JobPostCourse
-from app.models.company_profile import CompanyProfile
 
 
 class JobPostRepository:
@@ -44,7 +43,6 @@ class JobPostRepository:
         return (await self.db.execute(statement)).scalar_one_or_none()
     
 
-    # [mark] for existence check only
     async def get_by_title_and_company_profile_id(self, job_title: str, company_profile_id: int) -> JobPost | None:
         statement = select(JobPost).where(
             JobPost.company_profile_id == company_profile_id,
@@ -66,12 +64,48 @@ class JobPostRepository:
         return result.scalars().all()
     
     
-    # [mark] primarily used by alumni
-    async def get_by_latest(self, user_course_id: int, page: int = 1, page_size: int = 20) -> tuple[list[JobPost], int, int]:
+    async def get_alumni_list(self, alumni_course_id: int, page: int = 1, page_size: int = 20) -> tuple[list[JobPost], int, int]:
         search_filter = and_(
             JobPost.is_archived.is_(False),
             JobPost.is_published.is_(True),
-            JobPostCourse.job_post_course_id == user_course_id
+            JobPostCourse.job_post_course_id == alumni_course_id
+        )
+
+        base_statement = (
+            select(JobPost)
+            .options(
+                selectinload(JobPost.company),
+                selectinload(JobPost.job_post_courses),
+            )
+            .join(JobPost.job_post_courses)
+            .where(search_filter)
+            .order_by(JobPost.posted_at.desc())
+        )
+
+        count_statement = (
+            select(func.count(func.distinct(JobPost.id)))
+            .select_from(JobPost)
+            .join(JobPost.job_post_courses)
+            .where(search_filter)
+        )
+
+        total = (await self.db.execute(count_statement)).scalar()
+        total_pages = (total + page_size - 1) // page_size
+
+        result = await self.db.execute(
+            base_statement
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+
+        job_posts = result.scalars().unique().all()
+        return job_posts, total, total_pages
+    
+    
+    async def get_company_list(self, company_id: int, page: int = 1, page_size: int = 20) -> tuple[list[JobPost], int, int]:
+        search_filter = and_(
+            JobPost.is_archived.is_(False),
+            JobPost.company_profile_id == company_id,
         )
 
         base_statement = (
