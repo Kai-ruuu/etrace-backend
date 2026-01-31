@@ -110,11 +110,30 @@ class JobPostService:
         return JobPostOut.model_validate(db_job_post) if as_pymodel else db_job_post
     
     
-    async def get_by_latest(self, user: Account, page: int = 1, page_size: int = 20) -> dict:
+    async def get_alumni_list(self, user: Account, page: int = 1, page_size: int = 20) -> dict:
         user.permissions.raise_unauthorized_if_excludes(Action.READ_JOB_POSTS)
 
         db_alumni_profile = await self.alumni_profile_repo.get_by_account_id(user.id)
-        job_posts, total, total_pages = await self.job_post_repo.get_by_latest(db_alumni_profile.course_id, page, page_size)
+        job_posts, total, total_pages = await self.job_post_repo.get_alumni_list(db_alumni_profile.course_id, page, page_size)
+
+        items = [JobPostOut.model_validate(job_post) for job_post in job_posts]
+
+        return {
+            "items": items,
+            "total": total,
+            "total_pages": total_pages,
+            "page": page,
+            "page_size": page_size,
+            "has_next": page < total_pages,
+            "has_prev": page > 1
+        }
+    
+    
+    async def get_company_list(self, user: Account, page: int = 1, page_size: int = 20) -> dict:
+        user.permissions.raise_unauthorized_if_excludes(Action.READ_JOB_POSTS)
+
+        db_company_profile = await self.company_profile_repo.get_by_account_id(user.id)
+        job_posts, total, total_pages = await self.job_post_repo.get_company_list(db_company_profile.id, page, page_size)
 
         items = [JobPostOut.model_validate(job_post) for job_post in job_posts]
 
@@ -221,16 +240,16 @@ class JobPostService:
         return JobPostOut.model_validate(db_job_post) if as_pymodel else db_job_post
     
 
-    async def dislike(self, user: Account, job_post_id: int, as_pymodel: bool = False) -> JobPost | JobPostOut:
+    async def dislike_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> JobPost | JobPostOut:
         user.permissions.raise_unauthorized_if_excludes(Action.INTERACT_WITH_JOB_POSTS)
 
-        db_job_post = await self.job_post_repo.get_by_id(job_post_id)
+        db_job_post = await self.job_post_repo.get_by_id(id)
 
         if not db_job_post:
             raise JOB_POST_NOT_FOUND_EXCEPTION
         
         db_alumni_profile = await self.alumni_profile_repo.get_by_account_id(user.id)
-        db_job_post_like = await self.job_post_like_repo.get_by_job_post_and_alumni_id(job_post_id, db_alumni_profile.id)
+        db_job_post_like = await self.job_post_like_repo.get_by_job_post_and_alumni_id(id, db_alumni_profile.id)
         
         if not db_job_post_like:
             raise JOB_POST_LIKE_NOT_FOUND_EXCEPTION
@@ -245,10 +264,10 @@ class JobPostService:
             raise JOB_POST_UNABLE_TO_DISLIKE_EXCEPTION
     
 
-    async def like(self, user: Account, job_post_id: int, as_pymodel: bool = False) -> JobPost | JobPostOut:
+    async def like_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> JobPost | JobPostOut:
         user.permissions.raise_unauthorized_if_excludes(Action.INTERACT_WITH_JOB_POSTS)
 
-        db_job_post = await self.job_post_repo.get_by_id(job_post_id)
+        db_job_post = await self.job_post_repo.get_by_id(id)
 
         if not db_job_post:
             raise JOB_POST_NOT_FOUND_EXCEPTION
@@ -257,7 +276,7 @@ class JobPostService:
         
         try:
             await self.job_post_like_repo.create(JobPostLike(
-                job_post_id=job_post_id,
+                job_post_id=id,
                 alumni_profile_id=db_alumni_profile.id
             ))
             await self.db.commit()
@@ -268,24 +287,23 @@ class JobPostService:
             raise JOB_POST_UNABLE_TO_DISLIKE_EXCEPTION
     
 
-    # [mark] the goal is to make alumni profile visible to the company that posted the job
-    async def send_cv(self, user: Account, job_post_id: int, as_pymodel: bool = False) -> JobPost | JobPostOut:
+    async def send_cv_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> JobPost | JobPostOut:
         user.permissions.raise_unauthorized_if_excludes(Action.INTERACT_WITH_JOB_POSTS)
 
-        db_job_post = await self.job_post_repo.get_by_id(job_post_id)
+        db_job_post = await self.job_post_repo.get_by_id(id)
 
         if not db_job_post:
             raise JOB_POST_NOT_FOUND_EXCEPTION
         
         db_alumni_profile = await self.alumni_profile_repo.get_by_account_id(user.id)
-        db_job_post_interest = await self.job_post_interest_repo.get_by_job_post_and_alumni_id(job_post_id, db_alumni_profile.id)
+        db_job_post_interest = await self.job_post_interest_repo.get_by_job_post_and_alumni_id(id, db_alumni_profile.id)
 
         if db_job_post_interest:
             raise JOB_POST_CV_ALREADY_SENT_EXCEPTION
         
         try:
             await self.job_post_interest_repo.create(JobPostInterest(
-                job_post_id=job_post_id,
+                job_post_id=id,
                 alumni_profile_id=db_alumni_profile.id
             ))
             await self.db.commit()
