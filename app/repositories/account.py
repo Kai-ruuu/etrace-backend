@@ -4,6 +4,7 @@ from sqlalchemy import select, or_, func, literal
 
 from app.core.enums import AccountRole
 from app.models.account import Account
+from app.utils.password import hash_password
 from app.models.dean_profile import DeanProfile
 from app.models.alumni_profile import AlumniProfile
 from app.models.company_profile import CompanyProfile
@@ -136,6 +137,13 @@ class AccountRepository:
         accounts = result.scalars().unique().all()
 
         return accounts, total, total_pages
+    
+    
+    async def change_password(self, account: Account, new_password: str) -> Account:
+        account.password = hash_password(new_password)
+        await self.db.commit()
+        await self.db.refresh(account)
+        return account
     
     
     @property

@@ -9,7 +9,7 @@ from app.services.job_post_interest import JobPostInterestService
 from app.schemas.job_post_interest import JobPostInterestCompanyListOut
 
 
-router = APIRouter(tags=["job-post-interest"], prefix="/api/v1/user/job-post-interest")
+router = APIRouter(tags=["job-post-interest"], prefix="/api/v1/job-post-interest")
 
 
 @router.patch("/{id}/unreview", response_model=JobPostInterestCompanyListOut)
