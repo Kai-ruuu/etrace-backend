@@ -1,15 +1,39 @@
-from fastapi import Request, Query, Depends, APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Query, Request, Depends, UploadFile, Form, File
 
 from app.models.account import Account
 from app.utils.rate_limiting import limiter
-from app.schemas.account import AlumniAccountOut
+from app.services.alumni import AlumniService
+from app.services.profile import ProfileService
 from app.core.enums import AccountRole
 from app.core.dependencies import get_db, allow_roles
-from app.services.alumni import AlumniService
+from app.schemas.account import AlumniAccountOut
+from app.schemas.alumni_profile import AlumniProfileOut
 
 
 router = APIRouter(tags=["alumni"], prefix="/api/v1/user/alumni")
+
+
+@router.patch("/")
+@limiter.limit("10/minute")
+async def update(
+    request: Request,
+    address: str | None = Form(None),
+    phone_number: str | None = Form(None),
+    profile_picture_file: UploadFile | None = File(None),
+    curriculum_vitae_file: UploadFile | None = File(None),
+    db: AsyncSession = Depends(get_db),
+    user: Account = Depends(allow_roles([AccountRole.ALUMNI])),
+) -> AlumniProfileOut:
+    service = ProfileService(db, user.role)
+    return await service.update_as_alumni(
+        user,
+        address,
+        phone_number,
+        profile_picture_file,
+        curriculum_vitae_file,
+        True
+    )
 
 
 @router.get("/search")

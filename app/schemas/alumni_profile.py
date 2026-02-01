@@ -18,6 +18,13 @@ class AlumniProfileBase(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class AlumniProfileIn(BaseModel):
+    address: str | None
+    phone_number: str | None
+    profile_picture_filename: str | None
+    curriculum_vitae_filename: str | None
+
+
 class AlumniProfileOut(AlumniProfileBase):
     id: int
     account_id: int

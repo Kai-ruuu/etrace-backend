@@ -8,11 +8,17 @@ from app.schemas.dean_profile import (
     DeanProfileOut
 )
 from app.schemas.alumni_profile import AlumniProfileOut
-from app.schemas.company_profile import CompanyProfileOut
-from app.schemas.peso_staff_profile import PesoStaffProfileOut
+from app.schemas.company_profile import (
+    CompanyProfileIn,
+    CompanyProfileOut
+)
+from app.schemas.peso_staff_profile import (
+    PesoStaffProfileIn,
+    PesoStaffProfileOut
+)
 from app.schemas.system_admin_profile import (
-    SystemAdminProfileOut,
-    SystemAdminProfileIn
+    SystemAdminProfileIn,
+    SystemAdminProfileOut
 )
 from app.models.account import Account
 from app.models.dean_profile import DeanProfile
@@ -190,18 +196,24 @@ class ProfileRepository:
         return db_profile
 
 
-    async def update_as_admin_by_id(
+    async def update(
         self,
         profile_id: int,
-        profile: SystemAdminProfileIn | DeanProfileIn,
+        profile: SystemAdminProfileIn | DeanProfileIn | PesoStaffProfileIn | CompanyProfileIn,
     ) -> (
         SystemAdminProfile |
-        DeanProfile
+        DeanProfile |
+        PesoStaffProfile |
+        CompanyProfile
     ):
         statement = (
             update(self.ProfileModel)
             .where(self.ProfileModel.id == profile_id)
-            .values(**profile.model_dump(exclude_unset=True))
+            .values({
+                attribute: value
+                for attribute, value in profile.model_dump().items()
+                    if value is not None and str(value).strip() != ""
+            })
         )
 
         await self.db.execute(statement)
@@ -223,7 +235,7 @@ class ProfileRepository:
         await self.db.commit()
         return await self.get_by_id(profile_id)
     
-    
+        
     @property
     def ProfileModel(self):
         match self.role:

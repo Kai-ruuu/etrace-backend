@@ -9,10 +9,7 @@ from app.core.dependencies import get_db
 from app.core.enums import AccountRole, AlumniEmploymentStatus
 from app.schemas.account import (
     CompanyAccountOut,
-    AlumniAccountOut,
-    DeanAccountOut,
-    PesoStaffAccountOut,
-    SystemAdminAccountOut
+    AlumniAccountOut
 )
 from app.schemas.authentication import Token
 from app.services.external.geocoding import GeocodingService
