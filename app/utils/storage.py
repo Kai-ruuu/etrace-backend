@@ -121,9 +121,11 @@ class Upload:
         file: UploadFile | None,
         dest_folder: DestFolder,
         allowed_mimes: set[str],
+        *,
         required: bool = True,
         max_size: int = 5,
-        max_filename_length: int = 50
+        max_filename_length: int = 50,
+        update_target_filename: str | None = None
     ):
         self.file: UploadFile | None = file
         self.dest_folder: DestFolder = dest_folder
@@ -131,6 +133,7 @@ class Upload:
         self.required = required
         self.max_size = max_size
         self.max_filename_length = max_filename_length
+        self.update_target_filename = update_target_filename
 
 
 class UploadManager:
@@ -245,10 +248,17 @@ class UploadManager:
                 await self.rollback()
                 raise IMAGE_FILE_CANNOT_BE_READ_EXCEPTION(upload.dest_folder.value)
         
+        if upload.update_target_filename:
+            update_file_path = real_path / upload.update_target_filename
+            
+            if update_file_path.exists() and update_file_path.is_file():
+                update_file_path.unlink()
+            
+        
         self.staged_files_info[upload.dest_folder.value] = {
             "filename": new_filename,
             "temp_file_path": temp_file_path,
-            "real_file_path": real_file_path
+            "real_file_path": real_file_path,
         }
 
     

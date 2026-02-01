@@ -5,7 +5,7 @@ from app.models.account import Account
 from app.utils.rate_limiting import limiter
 from app.core.enums import AccountRole
 from app.core.dependencies import get_db, allow_roles
-from app.schemas.dean_profile import DeanProfileOut
+from app.schemas.dean_profile import DeanProfileOut, DeanProfileIn
 from app.schemas.account import DeanAccountIn, DeanAccountOut
 from app.services.dean import DeanService
 from app.services.profile import ProfileService
@@ -13,6 +13,18 @@ from app.services.account_provision import AccountProvisionService
 
 
 router = APIRouter(tags=["dean"], prefix="/api/v1/user/dean")
+
+
+@router.patch("/")
+@limiter.limit("10/minute")
+async def update(
+    request: Request,
+    profile: DeanProfileIn,
+    db: AsyncSession = Depends(get_db),
+    user: Account = Depends(allow_roles([AccountRole.DEAN])),
+) -> DeanProfileOut:
+    service = ProfileService(db, user.role)
+    return await service.update(user, profile, True)
 
 
 @router.post("/", response_model=DeanAccountOut)

@@ -127,6 +127,8 @@ JOB_POST_INTEREST_CV_ALREADY_NOT_REVIEWED_EXCEPTION = HTTPException(status.HTTP_
 
 COMPANY_NOT_FULLY_APPROVED_EXCEPTION = HTTPException(status.HTTP_403_FORBIDDEN, "You should be approved by both the System Administrator and PESO Staff before posting a job.")
 
+PROFILE_CANNOT_BE_UPDATED_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Profile cannot be updated.")
+
 def RAISE_FILE_CANNOT_BE_READ_EXCEPTION(file_field: str) -> None:
     raise HTTPException(
         status.HTTP_422_UNPROCESSABLE_CONTENT,

@@ -9,7 +9,6 @@ from app.api import school
 from app.api import course
 from app.api import company
 from app.api import account
-from app.api import profile
 from app.api import peso_staff
 from app.api import system_admin
 from app.api import authentication
@@ -26,7 +25,6 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.include_router(authentication.router)
 app.include_router(account.router)
-app.include_router(profile.router)
 app.include_router(system_admin.router)
 app.include_router(school.router)
 app.include_router(dean.router)
