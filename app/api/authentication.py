@@ -1,5 +1,4 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import APIRouter, Request, Depends, UploadFile, Form, File
 
 from app.models.account import Account
@@ -11,7 +10,10 @@ from app.schemas.account import (
     CompanyAccountOut,
     AlumniAccountOut
 )
-from app.schemas.authentication import Token
+from app.schemas.authentication import (
+    Token,
+    LoginCredentials
+)
 from app.services.external.geocoding import GeocodingService
 from app.services.authentication import AuthenticationService
 from app.services.account_provision import AccountProvisionService
@@ -24,8 +26,8 @@ router = APIRouter(tags=["all"], prefix="/api/v1/authentication")
 @limiter.limit("10/minute")
 async def login(
     request: Request,
+    form_data: LoginCredentials,
     db: AsyncSession=Depends(get_db),
-    form_data: OAuth2PasswordRequestForm = Depends()
 ) -> Token:
     authentication_service = AuthenticationService(db)
     return await authentication_service.authenticate_user(form_data)

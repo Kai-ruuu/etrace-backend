@@ -6,6 +6,7 @@
 alembic.ini
 
 # project files and generated folders
+refs
 storage
 todos.txt
 notes.txt

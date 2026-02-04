@@ -1,7 +1,6 @@
 from jwt import encode
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi.security import OAuth2PasswordRequestForm
 
 from app.models.account import Account
 from app.core.enums import AccountRole
@@ -13,7 +12,10 @@ from app.schemas.account import (
     PesoStaffAccountOut,
     SystemAdminAccountOut
 )
-from app.schemas.authentication import Token
+from app.schemas.authentication import (
+    Token,
+    LoginCredentials
+)
 from app.core.exceptions import *
 from app.core.settings import settings
 from app.utils.password import verify_password
@@ -31,8 +33,8 @@ class AuthenticationService:
         data.update({"exp": expiry})
         return encode(data, secret_key, secret_key_algo)
 
-    async def authenticate_user(self, form_data: OAuth2PasswordRequestForm) -> Token:
-        statement = select(Account).where(Account.email == form_data.username)
+    async def authenticate_user(self, form_data: LoginCredentials) -> Token:
+        statement = select(Account).where(Account.email == form_data.email)
         result = await self.db.execute(statement)
         db_account = result.scalar_one_or_none()
         
