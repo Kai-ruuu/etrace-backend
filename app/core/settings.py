@@ -6,6 +6,7 @@ APP_ENV_PATH = Path(__file__).parent.parent.parent / "app.dev.env"
 
 class Settings(BaseSettings):
     APP_ENV: str = "development"
+    APP_FRONTEND_URL: str
     APP_DB_USER: str = "root"
     APP_DB_PASS: str
     APP_DB_HOST: str = "localhost"
