@@ -12,6 +12,9 @@ todos.txt
 notes.txt
 scratch.txt
 
+# SSL
+*.pem
+
 # python
 __pycache__/
 *.py[cod]
