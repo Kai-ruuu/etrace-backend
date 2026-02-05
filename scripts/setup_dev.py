@@ -99,5 +99,13 @@ if __name__ == "__main__":
     asyncio.run(main())
 
     if run_after:
-        subprocess.run(["py", "-m", "uvicorn", "app.main:app", "--reload"])
+        subprocess.run([
+            sys.executable,
+            "-m", "uvicorn", "app.main:app",
+            "--reload",
+            "--host", "0.0.0.0",
+            "--port", "8000",
+            "--ssl-certfile", "api.etrace.test.pem",
+            "--ssl-keyfile", "api.etrace.test-key.pem",
+        ])
 

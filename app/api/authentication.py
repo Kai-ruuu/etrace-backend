@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Request, Depends, UploadFile, Form, File
+from fastapi import APIRouter, Request, Response, Depends, UploadFile, Form, File
 
 from app.models.account import Account
 from app.utils.rate_limiting import limiter
@@ -14,7 +14,6 @@ from app.schemas.authentication import (
     Token,
     LoginCredentials
 )
-from app.services.external.geocoding import GeocodingService
 from app.services.authentication import AuthenticationService
 from app.services.account_provision import AccountProvisionService
 
@@ -22,15 +21,28 @@ from app.services.account_provision import AccountProvisionService
 router = APIRouter(tags=["all"], prefix="/api/v1/authentication")
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login")
 @limiter.limit("10/minute")
 async def login(
     request: Request,
+    response: Response,
     form_data: LoginCredentials,
     db: AsyncSession=Depends(get_db),
-) -> Token:
+):
     authentication_service = AuthenticationService(db)
-    return await authentication_service.authenticate_user(form_data)
+    return await authentication_service.login(response, form_data)
+
+
+@router.post("/logout")
+@limiter.limit("10/minute")
+async def logout(
+    request: Request,
+    response: Response,
+    db: AsyncSession=Depends(get_db),
+    user: Account = Depends(get_current_user)
+):
+    authentication_service = AuthenticationService(db)
+    return authentication_service.logout(response)
 
 
 @router.get("/me")
@@ -41,8 +53,7 @@ async def me(
     user: Account = Depends(get_current_user)
 ):
     authentication_service = AuthenticationService(db)
-    geocoding_service = GeocodingService()
-    return authentication_service.current_user_to_pymodel(user, geocoding_service)
+    return authentication_service.current_user_to_pymodel(user)
 
 
 @router.post("/register/company", response_model=CompanyAccountOut)
