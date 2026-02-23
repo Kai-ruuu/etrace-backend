@@ -1,4 +1,5 @@
 from fastapi import UploadFile, Form, File
+from fastapi.responses import FileResponse
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,7 +10,7 @@ from app.core.enums import Action
 from app.models.account import Account
 from app.models.graduate_record import GraduateRecord
 from app.utils.logging import Logger
-from app.utils.storage import Upload, UploadManager, DestFolder
+from app.utils.storage import paths, Upload, UploadManager, DestFolder
 from app.utils.validation import validate_and_transform_graduate_record
 
 
@@ -18,6 +19,20 @@ class GraduateRecordService:
         self.db = db
         self.repo = GraduateRecordRepository(self.db)
         self.upload_manager = UploadManager()
+    
+    
+    async def get_contents(self, user: Account, filename: str | None = None) -> FileResponse:
+        user.permissions.raise_unauthorized_if_excludes(Action.READ_GRADUATE_RECORDS)
+        
+        if filename is None or len(str(filename).strip()) == 0:
+            raise FILE_NAME_NOT_PROVIDED_EXCEPTION
+        
+        constructed_path = paths["record"] / filename
+        
+        if constructed_path.exists() and constructed_path.is_file():
+            return FileResponse(path=constructed_path, media_type="text/csv")
+        else:
+            raise FILE_NOT_FOUND_EXCEPTION
 
 
     async def create(
@@ -91,10 +106,18 @@ class GraduateRecordService:
         return GraduateRecordOut.model_validate(db_graduate_record) if as_pymodel else db_graduate_record
     
     
-    async def search(self, user: Account, query: str, page: int = 1, page_size: int = 20) -> dict:
+    async def search(
+        self,
+        user: Account,
+        query: str | None,
+        course_id: int | None,
+        archived: str | None,
+        page: int = 1,
+        page_size: int = 20
+    ) -> dict:
         user.permissions.raise_unauthorized_if_excludes(Action.READ_GRADUATE_RECORDS)
         
-        schools, total, total_pages = await self.repo.search(query, page,  page_size)
+        schools, total, total_pages = await self.repo.search(query, course_id, archived, page,  page_size)
 
         items = [GraduateRecordOut.model_validate(school) for school in schools]
 

@@ -26,6 +26,15 @@ class AccountOutBase(AccountBase):
 class DeanAccountOut(AccountOutBase):
     dean_profile: DeanProfileOut
     model_config = {"from_attributes": True}
+    
+    @classmethod
+    def custom_validate(cls, account) -> dict:
+        dict_dean_account = cls.model_validate(account).model_dump()
+        dict_dean_account["dean_profile"]["school"] = {
+            "id": account.dean_profile.school.id,
+            "name": account.dean_profile.school.name,
+        }
+        return dict_dean_account
 
 
 class AlumniAccountOut(AccountOutBase):

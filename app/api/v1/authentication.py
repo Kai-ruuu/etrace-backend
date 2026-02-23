@@ -10,10 +10,7 @@ from app.schemas.account import (
     CompanyAccountOut,
     AlumniAccountOut
 )
-from app.schemas.authentication import (
-    Token,
-    LoginCredentials
-)
+from app.schemas.authentication import LoginCredentials
 from app.services.authentication import AuthenticationService
 from app.services.account_provision import AccountProvisionService
 
@@ -22,7 +19,7 @@ router = APIRouter(tags=["all"], prefix="/api/v1/authentication")
 
 
 @router.post("/login")
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def login(
     request: Request,
     response: Response,
@@ -34,7 +31,7 @@ async def login(
 
 
 @router.post("/logout")
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def logout(
     request: Request,
     response: Response,
@@ -46,7 +43,7 @@ async def logout(
 
 
 @router.get("/me")
-@limiter.limit("10/minute")
+# @limiter.limit("30/minute")
 async def me(
     request: Request,
     db: AsyncSession=Depends(get_db),
@@ -57,7 +54,7 @@ async def me(
 
 
 @router.post("/register/company", response_model=CompanyAccountOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def register_as_company(
     request: Request,
     email: str=Form(..., min_length=4, max_length=255),     # [mark] review
@@ -97,7 +94,7 @@ async def register_as_company(
 
 
 @router.post("/register/alumni", response_model=AlumniAccountOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def register_as_alumni(
     request: Request,
     email: str=Form(..., min_length=4, max_length=255),     # [mark] review
@@ -111,8 +108,8 @@ async def register_as_alumni(
     course_id: int = Form(...),
     year_graduated: int = Form(..., ge=1000),
     employment_status: AlumniEmploymentStatus = Form(AlumniEmploymentStatus.UNEMPLOYED),
-    occupations: str = Form(...),
-    socials: str = Form(...),
+    occupations: str = Form("[]"),
+    socials: str = Form("[]"),
     profile_picture_file: UploadFile | None = File(None),
     curriculum_vitae_file: UploadFile | None = File(None),
     db: AsyncSession = Depends(get_db)

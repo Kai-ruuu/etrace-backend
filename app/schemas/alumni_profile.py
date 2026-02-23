@@ -1,6 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel
 
+from app.schemas.course import CourseOut
 from app.core.enums import AlumniApprovalStatus, AlumniEmploymentStatus
 
 
@@ -31,12 +32,14 @@ class AlumniProfileOut(AlumniProfileBase):
     dean_approval_status: AlumniApprovalStatus
     employment_status: AlumniEmploymentStatus
     year_graduated: int
-    # occupation_states: list
     address: str
     phone_number: str
     # socials: list
     course_id: int
-    # course: CourseOut
+    course: CourseOut
     created_at: datetime
     updated_at: datetime
     model_config = {"from_attributes": True}
+
+class AlumniOccupationLocationIn(BaseModel):
+    location: str

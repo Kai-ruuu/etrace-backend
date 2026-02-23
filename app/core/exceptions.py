@@ -111,6 +111,8 @@ UNABLE_TO_CREATE_JOB_POST_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SER
 
 JOB_POST_LIKE_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "You have not liked the job post.")
 
+JOB_POST_ALREADY_LIKED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "You have already liked the job post.")
+
 JOB_POST_UNABLE_TO_LIKE_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to like the job post.")
 
 JOB_POST_UNABLE_TO_DISLIKE_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to unlike the job post.")
@@ -128,6 +130,20 @@ JOB_POST_INTEREST_CV_ALREADY_NOT_REVIEWED_EXCEPTION = HTTPException(status.HTTP_
 COMPANY_NOT_FULLY_APPROVED_EXCEPTION = HTTPException(status.HTTP_403_FORBIDDEN, "You should be approved by both the System Administrator and PESO Staff before posting a job.")
 
 PROFILE_CANNOT_BE_UPDATED_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Profile cannot be updated.")
+
+OCCUPATION_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "Occupation not found.")
+
+OCCUPATION_ALIGNMENT_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "Occupation is not aligned to the course.")
+
+OCCUPATION_ALREADY_ALIGNED_EXCEPTION = HTTPException(status.HTTP_409_CONFLICT, "Occupation is already aligned to the course.")
+
+OCCUPATION_UNABLE_TO_UNALIGN_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to unalign occupation to course.")
+
+OCCUPATION_UNABLE_TO_ALIGN_EXCEPTION = HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Unable to align occupation to course.")
+
+FILE_NOT_FOUND_EXCEPTION = HTTPException(status.HTTP_404_NOT_FOUND, "File not found.")
+
+FILE_NAME_NOT_PROVIDED_EXCEPTION = HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "File name not provided.")
 
 def RAISE_FILE_CANNOT_BE_READ_EXCEPTION(file_field: str) -> None:
     raise HTTPException(

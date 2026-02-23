@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.utils.logging import Logger
 from app.schemas.course import CourseIn, CourseOut
 from app.repositories.course import CourseRepository
+from app.repositories.profile import ProfileRepository
 from app.core.exceptions import *
 from app.core.enums import Action
 from app.models.course import Course
@@ -38,6 +39,13 @@ class CourseService:
             Logger.error(f"Unable to create course. - {repr(e)}")
             raise UNABLE_TO_CREATE_COURSE_EXCEPTION
 
+
+    async def get_all(self, as_pymodel: bool = False) -> list[Course] | list[CourseOut]:
+        # user.permissions.raise_unauthorized_if_excludes(Action.READ_COURSES)
+        
+        courses = await self.repo.get_all()
+        return [CourseOut.model_validate(course) for course in courses] if as_pymodel else courses
+
     
     async def get_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> Course | CourseOut:
         user.permissions.raise_unauthorized_if_excludes(Action.READ_COURSES)
@@ -48,7 +56,20 @@ class CourseService:
             raise COURSE_NOT_FOUND_EXCEPTION
         
         return CourseOut.model_validate(db_course) if as_pymodel else db_course
+    
+    
+    async def get_dean_list(self, user: Account, as_pymodel: bool = False) -> list[Course] | list[CourseOut]:
+        user.permissions.raise_unauthorized_if_excludes(Action.READ_COURSES)
 
+        dean_profile_repo = ProfileRepository(self.db, user.role)
+        db_dean_profile = await dean_profile_repo.get_by_account_id(user.id)
+        
+        if not db_dean_profile:
+            raise UNAUTHORIZED_ACCESS_EXCEPION
+        
+        db_dean_school_courses = await self.repo.get_by_school_id(db_dean_profile.school_id)
+        
+        return [CourseOut.model_validate(course) for course in db_dean_school_courses] if as_pymodel else db_dean_school_courses
     
     async def get_by_name(self, user: Account, name: str, as_pymodel: bool = False) -> Course | CourseOut:
         user.permissions.raise_unauthorized_if_excludes(Action.READ_COURSES)
@@ -61,10 +82,10 @@ class CourseService:
         return CourseOut.model_validate(db_course) if as_pymodel else db_course
     
     
-    async def search(self, user: Account, query: str, page: int = 1, page_size: int = 20) -> dict:
+    async def search(self, user: Account, query: str | None, archived: bool | None, page: int = 1, page_size: int = 20) -> dict:
         user.permissions.raise_unauthorized_if_excludes(Action.READ_COURSES)
         
-        courses, total, total_pages = await self.repo.search(query, page,  page_size)
+        courses, total, total_pages = await self.repo.search(query, archived, page, page_size)
 
         items = [CourseOut.model_validate(course) for course in courses]
 

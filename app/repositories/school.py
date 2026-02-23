@@ -1,4 +1,4 @@
-from sqlalchemy import select, func
+from sqlalchemy import select, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.school import School
@@ -36,15 +36,27 @@ class SchoolRepository:
 
         return result.scalars().all()
     
-
-    async def search(self, query: str | None = None, page: int = 1, page_size: int = 20) -> tuple[list[School], int, int]:
-        base_statement = select(School)
+    
+    async def search(
+        self,
+        query: str | None = None,
+        archived: bool | None = None,
+        page: int = 1,
+        page_size: int = 20
+    ) -> tuple[list[School], int, int]:
+        filters = []
+        base_statement = select(School).order_by(School.created_at.asc())
         count_statement = select(func.count()).select_from(School)
 
         if query:
-            search_filter = School.normalized_name.ilike(f"%{query}%")
-            base_statement = base_statement.where(search_filter)
-            count_statement = count_statement.where(search_filter)
+            filters.append(School.normalized_name.ilike(f"%{query}%"))
+        if archived is not None:
+            filters.append(School.is_archived.is_(archived))
+
+        if filters:
+            final_filter = and_(*filters)
+            base_statement = base_statement.where(final_filter)
+            count_statement = count_statement.where(final_filter)
         
         total_result = await self.db.execute(count_statement)
         total = total_result.scalar()
@@ -71,6 +83,3 @@ class SchoolRepository:
         await self.db.commit()
         await self.db.refresh(db_school)
         return db_school
-
-
-    

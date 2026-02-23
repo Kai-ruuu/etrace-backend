@@ -13,7 +13,7 @@ router = APIRouter(tags=["job-post-interest"], prefix="/api/v1/job-post-interest
 
 
 @router.patch("/{id}/unreview", response_model=JobPostInterestCompanyListOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def unreview(
     request: Request,
     id: int,
@@ -25,7 +25,7 @@ async def unreview(
 
 
 @router.patch("/{id}/review", response_model=JobPostInterestCompanyListOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def review(
     request: Request,
     id: int,

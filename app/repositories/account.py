@@ -3,8 +3,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_, func, literal
 
 from app.core.enums import AccountRole
-from app.models.account import Account
+from app.core.enums import (
+    AlumniApprovalStatus,
+    CompanyApprovalStatus
+)
 from app.utils.password import hash_password
+from app.models.account import Account
+from app.models.occupation import Occupation
+from app.models.occupation_state import OccupationState
 from app.models.dean_profile import DeanProfile
 from app.models.alumni_profile import AlumniProfile
 from app.models.company_profile import CompanyProfile
@@ -78,6 +84,30 @@ class AccountRepository:
         result = await self.db.execute(statement)
         return result.scalar_one_or_none()
         
+
+    async def get_alumni_by_id(self, id: int) -> Account | None:
+        statement = (
+            select(Account)
+            .options(
+                selectinload(Account.alumni_profile)
+                    .selectinload(AlumniProfile.course),
+
+                selectinload(Account.alumni_profile)
+                    .selectinload(AlumniProfile.occupation_states)
+                    .selectinload(OccupationState.occupation),
+                    
+                selectinload(Account.alumni_profile)
+                    .selectinload(AlumniProfile.socials)
+            )
+            .where(
+                Account.id == id,
+                Account.role == AccountRole.ALUMNI
+            )
+        )
+
+        result = await self.db.execute(statement)
+        return result.scalar_one_or_none()
+        
         
     async def get_by_email(self, email: str) -> Account | None:
         statement = (
@@ -108,25 +138,41 @@ class AccountRepository:
         return db_account
     
 
-    async def search(self, query: str | None = None, page: int = 1, page_size: int = 20) -> tuple[list[Account], int, int]:
+    async def search(
+        self,
+        query: str | None = None,
+        page: int = 1,
+        page_size: int = 20,
+        *,
+        dean_approval_status: AlumniApprovalStatus | None = None,
+        sysad_approval_status: CompanyApprovalStatus | None = None,
+        peso_staff_approval_status: CompanyApprovalStatus | None = None,
+    ) -> tuple[list[Account], int, int]:
+        filters = [Account.role == self.role]
+    
+        if query:
+            filters.append(self.get_filter_statement(query))
+    
+        if dean_approval_status is not None:
+            filters.append(self.AccountProfileModel.dean_approval_status == dean_approval_status)
+        elif sysad_approval_status is not None:
+            filters.append(self.AccountProfileModel.sysad_approval_status == sysad_approval_status)
+        elif peso_staff_approval_status is not None:
+            filters.append(self.AccountProfileModel.peso_staff_approval_status == peso_staff_approval_status)
+
         search_statement = (
             select(Account)
             .options(self.AccountProfileLoad)
             .join(self.AccountProfileModel)
-            .where(Account.role == self.role)
+            .where(*filters)
         )
         
         count_statement = (
             select(func.count())
             .select_from(Account)
             .join(self.AccountProfileModel)
-            .where(Account.role == self.role)
+            .where(*filters)
         )
-
-        if query:
-            filter_statement = self.get_filter_statement(query)
-            search_statement = search_statement.where(filter_statement)
-            count_statement = count_statement.where(filter_statement)
 
         total_result = await self.db.execute(count_statement)
         total = total_result.scalar()
@@ -173,5 +219,5 @@ class AccountRepository:
             case AccountRole.SYSTEM_ADMIN: return selectinload(Account.system_admin_profile)
             case AccountRole.PESO_STAFF: return selectinload(Account.peso_staff_profile)
             case AccountRole.COMPANY: return selectinload(Account.company_profile)
-            case AccountRole.ALUMNI: return selectinload(Account.alumni_profile)
-            case AccountRole.DEAN: return selectinload(Account.dean_profile)
+            case AccountRole.ALUMNI: return selectinload(Account.alumni_profile).selectinload(AlumniProfile.course)
+            case AccountRole.DEAN: return selectinload(Account.dean_profile).selectinload(DeanProfile.school)

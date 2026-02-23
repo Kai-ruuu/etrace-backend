@@ -41,7 +41,7 @@ class DeanService:
         
         accounts, total, total_pages = await self.account_repo.search(query, page, page_size)
 
-        items = [DeanAccountOut.model_validate(account) for account in accounts]
+        items = [DeanAccountOut.custom_validate(account) for account in accounts]
 
         return {
             "items": items,

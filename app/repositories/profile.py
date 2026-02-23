@@ -116,7 +116,7 @@ class ProfileRepository:
         self,
         account_id: int
     ) -> CompanyProfile:
-        db_profile = await self.get_by_account_id(account_id, False)
+        db_profile = await self.get_by_account_id(account_id)
         db_profile.sysad_approval_status = CompanyApprovalStatus.APPROVED
         
         await self.db.commit()
@@ -125,7 +125,7 @@ class ProfileRepository:
     
     
     async def reject_company_as_system_admin_by_account_id(self, account_id: int) -> CompanyProfile:
-        db_profile = await self.get_by_account_id(account_id, False)
+        db_profile = await self.get_by_account_id(account_id)
         db_profile.sysad_approval_status = CompanyApprovalStatus.REJECTED
         
         await self.db.commit()
@@ -134,7 +134,7 @@ class ProfileRepository:
     
     
     async def pend_company_as_system_admin_by_account_id(self, account_id: int) -> CompanyProfile:
-        db_profile = await self.get_by_account_id(account_id, False)
+        db_profile = await self.get_by_account_id(account_id)
         db_profile.sysad_approval_status = CompanyApprovalStatus.PENDING
         
         await self.db.commit()
@@ -143,7 +143,7 @@ class ProfileRepository:
     
     
     async def approve_company_as_peso_staff_by_account_id(self, account_id: int) -> CompanyProfile:
-        db_profile = await self.get_by_account_id(account_id, False)
+        db_profile = await self.get_by_account_id(account_id)
         db_profile.peso_staff_approval_status = CompanyApprovalStatus.APPROVED
         
         await self.db.commit()
@@ -152,7 +152,7 @@ class ProfileRepository:
     
     
     async def reject_company_as_peso_staff_by_account_id(self, account_id: int) -> CompanyProfile:
-        db_profile = await self.get_by_account_id(account_id, False)
+        db_profile = await self.get_by_account_id(account_id)
         db_profile.peso_staff_approval_status = CompanyApprovalStatus.REJECTED
         
         await self.db.commit()
@@ -161,7 +161,7 @@ class ProfileRepository:
         
     
     async def pend_company_as_peso_staff_by_account_id(self, account_id: int) -> CompanyProfile:
-        db_profile = await self.get_by_account_id(account_id, False)
+        db_profile = await self.get_by_account_id(account_id)
         db_profile.peso_staff_approval_status = CompanyApprovalStatus.PENDING
         
         await self.db.commit()
@@ -170,7 +170,7 @@ class ProfileRepository:
     
     
     async def approve_alumni(self, account_id: int) -> AlumniProfile:
-        db_profile = await self.get_by_account_id(account_id, False)
+        db_profile = await self.get_by_account_id(account_id)
         db_profile.dean_approval_status = AlumniApprovalStatus.APPROVED
         
         await self.db.commit()
@@ -179,7 +179,7 @@ class ProfileRepository:
     
     
     async def reject_alumni(self, account_id: int) -> AlumniProfile:
-        db_profile = await self.get_by_account_id(account_id, False)
+        db_profile = await self.get_by_account_id(account_id)
         db_profile.dean_approval_status = AlumniApprovalStatus.REJECTED
         
         await self.db.commit()
@@ -188,7 +188,7 @@ class ProfileRepository:
     
     
     async def pend_alumni(self, account_id: int) -> AlumniProfile:
-        db_profile = await self.get_by_account_id(account_id, False)
+        db_profile = await self.get_by_account_id(account_id)
         db_profile.dean_approval_status = AlumniApprovalStatus.PENDING
         
         await self.db.commit()

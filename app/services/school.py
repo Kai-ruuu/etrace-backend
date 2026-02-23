@@ -47,6 +47,13 @@ class SchoolService:
             raise SCHOOL_NOT_FOUND_EXCEPTION
         
         return SchoolOut.model_validate(db_school) if as_pymodel else db_school
+    
+    
+    async def get_all(self, user: Account, as_pymodel: bool = False) -> list[School] | list[SchoolOut]:
+        user.permissions.raise_unauthorized_if_excludes(Action.READ_SCHOOLS)
+        
+        schools = await self.repo.get_all()
+        return [SchoolOut.model_validate(school) for school in schools] if as_pymodel else schools
 
     
     async def get_by_name(self, user: Account, name: str, as_pymodel: bool = False) -> School | SchoolOut:
@@ -60,10 +67,10 @@ class SchoolService:
         return SchoolOut.model_validate(db_school) if as_pymodel else db_school
     
     
-    async def search(self, user: Account, query: str, page: int = 1, page_size: int = 20) -> dict:
+    async def search(self, user: Account, query: str | None, archived: bool | None, page: int = 1, page_size: int = 20) -> dict:
         user.permissions.raise_unauthorized_if_excludes(Action.READ_SCHOOLS)
         
-        schools, total, total_pages = await self.repo.search(query, page,  page_size)
+        schools, total, total_pages = await self.repo.search(query, archived, page, page_size)
 
         items = [SchoolOut.model_validate(school) for school in schools]
 
