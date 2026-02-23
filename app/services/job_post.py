@@ -273,6 +273,10 @@ class JobPostService:
             raise JOB_POST_NOT_FOUND_EXCEPTION
         
         db_alumni_profile = await self.alumni_profile_repo.get_by_account_id(user.id)
+        db_job_post_like = await self.job_post_like_repo.get_by_job_post_and_alumni_id(id, db_alumni_profile.id)
+
+        if db_job_post_like:
+            raise JOB_POST_ALREADY_LIKED_EXCEPTION
         
         try:
             await self.job_post_like_repo.create(JobPostLike(

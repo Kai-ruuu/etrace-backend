@@ -3,45 +3,44 @@ from fastapi import Request, Query, Depends, APIRouter
 
 from app.models.account import Account
 from app.utils.rate_limiting import limiter
-from app.schemas.system_admin_profile import SystemAdminProfileOut, SystemAdminProfileIn
-from app.schemas.account import SystemAdminAccountIn, SystemAdminAccountOut
+from app.schemas.account import PesoStaffAccountIn, PesoStaffAccountOut
+from app.schemas.peso_staff_profile import PesoStaffProfileOut, PesoStaffProfileIn
 from app.core.enums import AccountRole
 from app.core.dependencies import get_db, allow_roles
 from app.services.profile import ProfileService
-from app.services.system_admin import SystemAdminService
+from app.services.peso_staff import PesoStaffService
 from app.services.account_provision import AccountProvisionService
 
 
-router = APIRouter(tags=["system-admin"], prefix="/api/v1/user/system-admin")
+router = APIRouter(tags=["peso-staff"], prefix="/api/v1/peso-staff")
 
 
 @router.patch("/")
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def update(
     request: Request,
-    profile: SystemAdminProfileIn,
+    profile: PesoStaffProfileIn,
     db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.PESO_STAFF])),
-) -> SystemAdminProfileOut:
+) -> PesoStaffProfileOut:
     service = ProfileService(db, user.role)
     return await service.update(user, profile, True)
 
 
-
-@router.post("/", response_model=SystemAdminAccountOut)
-@limiter.limit("10/minute")
+@router.post("/", response_model=PesoStaffAccountOut)
+@limiter.limit("30/minute")
 async def create(
     request: Request,
-    system_admin: SystemAdminAccountIn,
+    peso_staff: PesoStaffAccountIn,
     db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
-) -> SystemAdminAccountOut:
-    service = AccountProvisionService(db, AccountRole.SYSTEM_ADMIN)
-    return await service.create_system_admin(user, system_admin, True)
+) -> PesoStaffAccountOut:
+    service = AccountProvisionService(db, AccountRole.PESO_STAFF)
+    return await service.create_peso_staff(user, peso_staff, True)
     
 
 @router.get("/search")
-@limiter.limit("10/minute")
+# @limiter.limit("30/minute")
 async def search(
     request: Request,
     query: str | None = None,
@@ -50,31 +49,31 @@ async def search(
     db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
 ) -> dict:
-    service = SystemAdminService(db)
+    service = PesoStaffService(db)
     return await service.search(user, query, page, page_size)
 
 
-@router.patch("/{id}/disable", response_model=SystemAdminAccountOut)
-@limiter.limit("10/minute")
+@router.patch("/{id}/disable", response_model=PesoStaffAccountOut)
+@limiter.limit("30/minute")
 async def disable(
     request: Request,
     id: int,
     db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
-) -> SystemAdminAccountOut:
-    service = SystemAdminService(db)
+) -> PesoStaffAccountOut:
+    service = PesoStaffService(db)
     return await service.disable_by_id(user, id, True)
 
 
-@router.patch("/{id}/enable", response_model=SystemAdminAccountOut)
-@limiter.limit("10/minute")
+@router.patch("/{id}/enable", response_model=PesoStaffAccountOut)
+@limiter.limit("30/minute")
 async def enable(
     request: Request,
     id: int,
     db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
-) -> SystemAdminAccountOut:
-    service = SystemAdminService(db)
+) -> PesoStaffAccountOut:
+    service = PesoStaffService(db)
     return await service.enable_by_id(user, id, True)
 
 

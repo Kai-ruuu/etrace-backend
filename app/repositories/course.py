@@ -1,4 +1,4 @@
-from sqlalchemy import select, func
+from sqlalchemy import select, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.course import Course
@@ -19,8 +19,17 @@ class CourseRepository:
     async def get_by_id(self, id: int) -> Course | None:
         statement = select(Course).where(Course.id == id)
         result = await self.db.execute(statement)
-
         return result.scalar_one_or_none()
+    
+    
+    async def get_by_school_id(self, school_id: int) -> list[Course]:
+        statement = (
+            select(Course)
+            .where(Course.school_id == school_id)
+            .order_by(Course.name.asc())
+        )
+        result = await self.db.execute(statement)
+        return result.scalars().all()
     
 
     async def get_by_name(self, name: str) -> Course | None:
@@ -45,15 +54,39 @@ class CourseRepository:
         missing_ids = set(ids) - found_ids
         return len(missing_ids) == 0, list(missing_ids)
     
+    
+    async def get_belongs_to_dean_school(self, dean_school_id: int, course_id: int) -> bool:
+        statement = (
+            select(Course)
+            .where(
+                Course.id == course_id,
+                Course.school_id == dean_school_id
+            )
+        )
+        result = (await self.db.execute(statement)).scalar_one_or_none()
+        return result is not None
+    
 
-    async def search(self, query: str | None = None, page: int = 1, page_size: int = 20) -> tuple[list[Course], int, int]:
-        base_statement = select(Course)
+    async def search(
+        self,
+        query: str | None = None,
+        archived: bool | None = None,
+        page: int = 1,
+        page_size: int = 20
+    ) -> tuple[list[Course], int, int]:
+        filters = []
+        base_statement = select(Course).order_by(Course.created_at.asc())
         count_statement = select(func.count()).select_from(Course)
 
         if query:
-            search_filter = Course.normalized_name.ilike(f"%{query}%")
-            base_statement = base_statement.where(search_filter)
-            count_statement = count_statement.where(search_filter)
+            filters.append(Course.normalized_name.ilike(f"%{query}%"))
+        if archived is not None:
+            filters.append(Course.is_archived.is_(archived))
+        
+        if filters:
+            final_filter = and_(*filters)
+            base_statement = base_statement.where(final_filter)
+            count_statement = count_statement.where(final_filter)
         
         total_result = await self.db.execute(count_statement)
         total = total_result.scalar()

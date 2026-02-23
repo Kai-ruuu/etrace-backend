@@ -12,23 +12,11 @@ from app.services.profile import ProfileService
 from app.services.account_provision import AccountProvisionService
 
 
-router = APIRouter(tags=["dean"], prefix="/api/v1/user/dean")
+router = APIRouter(tags=["dean"], prefix="/api/v1/dean")
 
 
-@router.patch("/")
-@limiter.limit("10/minute")
-async def update(
-    request: Request,
-    profile: DeanProfileIn,
-    db: AsyncSession = Depends(get_db),
-    user: Account = Depends(allow_roles([AccountRole.DEAN])),
-) -> DeanProfileOut:
-    service = ProfileService(db, user.role)
-    return await service.update(user, profile, True)
-
-
-@router.post("/", response_model=DeanAccountOut)
-@limiter.limit("10/minute")
+@router.post("", response_model=DeanAccountOut)
+@limiter.limit("30/minute")
 async def create(
     request: Request,
     dean: DeanAccountIn,
@@ -37,10 +25,22 @@ async def create(
 ) -> DeanAccountOut:
     service = AccountProvisionService(db, AccountRole.DEAN)
     return await service.create_dean(user, dean, True)
+
+
+@router.patch("/")
+@limiter.limit("30/minute")
+async def update(
+    request: Request,
+    profile: DeanProfileIn,
+    db: AsyncSession = Depends(get_db),
+    user: Account = Depends(allow_roles([AccountRole.DEAN])),
+) -> DeanProfileOut:
+    service = ProfileService(db, user.role)
+    return await service.update(user, profile, True)
     
 
 @router.get("/search")
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def search(
     request: Request,
     query: str | None = None,
@@ -54,7 +54,7 @@ async def search(
 
 
 @router.patch("/{id}/disable", response_model=DeanAccountOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def disable(
     request: Request,
     id: int,
@@ -66,7 +66,7 @@ async def disable(
 
 
 @router.patch("/{id}/enable", response_model=DeanAccountOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def enable(
     request: Request,
     id: int,
@@ -78,7 +78,7 @@ async def enable(
 
 
 @router.patch("/{id}/update-school/{school_id}", response_model=DeanProfileOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def update_school(
     request: Request,
     id: int,
@@ -88,5 +88,3 @@ async def update_school(
 ) -> DeanProfileOut:
     service = ProfileService(db, AccountRole.DEAN)
     return await service.update_dean_school_by_id(user, id, school_id, True)
-
-

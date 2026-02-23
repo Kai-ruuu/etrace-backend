@@ -12,7 +12,7 @@ class CompanyService:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
         self.account_repo = AccountRepository(self.db, AccountRole.COMPANY)
-        self.profile_repo = ProfileRepository(self.db, AccountRol)
+        self.profile_repo = ProfileRepository(self.db, AccountRole.COMPANY)
     
 
     async def get_by_id(self, user: Account, id: int, as_pymodel: bool = False) -> Account | CompanyAccountOut:

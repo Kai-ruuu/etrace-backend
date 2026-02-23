@@ -38,6 +38,9 @@ class Action(StrEnum):
     REVIEW_UNREVIEW_JOB_POST_INTERESTS = auto()
     GET_ALUMNI_LOCATION_INFO = auto()
     UPDATE_DEAN_SCHOOL = auto()
+    READ_OCCUPATIONS = auto()
+    CREATE_OCCUPATIONS = auto()
+    ALIGN_UNALIGN_OCCUPATIONS = auto()
 
 
 class AccountRole(StrEnum):

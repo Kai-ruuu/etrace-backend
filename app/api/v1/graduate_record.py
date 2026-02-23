@@ -14,7 +14,7 @@ router = APIRouter(tags=["graduate-record"], prefix="/api/v1/insti/graduate-reco
 
 
 @router.post("/", response_model=GraduateRecordOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def create(
     request: Request,
     graduate_record_file: UploadFile | None=File(None),
@@ -28,21 +28,33 @@ async def create(
 
 
 @router.get("/search")
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def search(
     request: Request,
     query: str | None = None,
+    course_id: int | None = None,
+    archived: bool | None = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=20, le=100),
     db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.DEAN])),
 ) -> dict:
     service = GraduateRecordService(db)
-    return await service.search(user, query, page, page_size)
+    return await service.search(user, query, course_id, archived, page, page_size)
+
+@router.get("/contents/{filename}")
+async def get_contents(
+    request: Request,
+    filename: str | None = None,
+    db: AsyncSession = Depends(get_db),
+    user: Account = Depends(allow_roles([AccountRole.DEAN])),
+):
+    service = GraduateRecordService(db)
+    return await service.get_contents(user, filename)
 
 
 @router.patch("/{id}/archive", response_model=GraduateRecordOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def archive(
     request: Request,
     id: int,
@@ -54,7 +66,7 @@ async def archive(
 
 
 @router.patch("/{id}/restore", response_model=GraduateRecordOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def restore(
     request: Request,
     id: int,

@@ -13,8 +13,19 @@ from app.core.dependencies import get_db, allow_roles
 router = APIRouter(tags=["school"], prefix="/api/v1/insti/school")
 
 
-@router.post("/", response_model=SchoolOut)
-@limiter.limit("10/minute")
+@router.get("", response_model=list[SchoolOut])
+@limiter.limit("30/minute")
+async def get_all(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
+) -> list[SchoolOut]:
+    service = SchoolService(db)
+    return await service.get_all(user, True)
+
+
+@router.post("", response_model=SchoolOut)
+@limiter.limit("30/minute")
 async def create(
     request: Request,
     school: SchoolIn,
@@ -26,21 +37,22 @@ async def create(
     
 
 @router.get("/search")
-@limiter.limit("10/minute")
+# @limiter.limit("30/minute")
 async def search(
     request: Request,
     query: str | None = None,
+    archived: bool | None = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=20, le=100),
     db: AsyncSession = Depends(get_db),
     user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
 ) -> dict:
     service = SchoolService(db)
-    return await service.search(user, query, page, page_size)
+    return await service.search(user, query, archived, page, page_size)
 
 
 @router.patch("/{id}/archive", response_model=SchoolOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def archive(
     request: Request,
     id: int,
@@ -52,7 +64,7 @@ async def archive(
 
 
 @router.patch("/{id}/restore", response_model=SchoolOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def restore(
     request: Request,
     id: int,

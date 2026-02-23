@@ -14,7 +14,7 @@ router = APIRouter(tags=["job-post"], prefix="/api/v1/job-post")
 
 
 @router.post("/", response_model=JobPostOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def create(
     request: Request,
     job_post: JobPostIn,
@@ -26,7 +26,7 @@ async def create(
 
 
 @router.get("/search")
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def search(
     request: Request,
     query: str | None = None,
@@ -40,7 +40,7 @@ async def search(
 
 
 @router.get("/list-for-alumni")
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def get_alumni_list(
     request: Request,
     page: int = Query(1, ge=1),
@@ -53,7 +53,7 @@ async def get_alumni_list(
 
 
 @router.get("/list-for-company")
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def get_company_list(
     request: Request,
     page: int = Query(1, ge=1),
@@ -66,7 +66,7 @@ async def get_company_list(
 
 
 @router.patch("/{id}/archive", response_model=JobPostOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def archive(
     request: Request,
     id: int,
@@ -78,7 +78,7 @@ async def archive(
 
 
 @router.patch("/{id}/restore", response_model=JobPostOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def restore(
     request: Request,
     id: int,
@@ -90,7 +90,7 @@ async def restore(
 
 
 @router.patch("/{id}/unpublish", response_model=JobPostOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def unpublish(
     request: Request,
     id: int,
@@ -102,7 +102,7 @@ async def unpublish(
 
 
 @router.patch("/{id}/publish", response_model=JobPostOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def publish(
     request: Request,
     id: int,
@@ -114,7 +114,7 @@ async def publish(
 
 
 @router.delete("/{id}/dislike", response_model=JobPostOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def dislike(
     request: Request,
     id: int,
@@ -126,7 +126,7 @@ async def dislike(
 
 
 @router.post("/{id}/like", response_model=JobPostOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def like(
     request: Request,
     id: int,
@@ -138,7 +138,7 @@ async def like(
 
 
 @router.post("/{id}/send-cv", response_model=JobPostOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def send_cv(
     request: Request,
     id: int,
@@ -150,7 +150,7 @@ async def send_cv(
 
 
 @router.get("/{id}/get-interested")
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def get_interested(
     request: Request,
     id: int,
@@ -164,7 +164,7 @@ async def get_interested(
 
 
 @router.get("/{id}/get-interests")
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def get_interests(
     request: Request,
     page: int = Query(1, ge=1),

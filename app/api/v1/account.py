@@ -15,11 +15,11 @@ from app.schemas.account import (
 )
 
 
-router = APIRouter(tags=["account"], prefix="/api/v1/user/account")
+router = APIRouter(tags=["account"], prefix="/api/v1/account")
 
 
 @router.patch("/change-password")
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def change_password(
     request: Request,
     change_password_info: ChangePasswordIn,

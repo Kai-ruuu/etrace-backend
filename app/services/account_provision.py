@@ -351,8 +351,8 @@ class AccountProvisionService:
         course_id: int = Form(...),
         year_graduated: int = Form(...),
         employment_status: AlumniEmploymentStatus = Form(AlumniEmploymentStatus.UNEMPLOYED),
-        occupations: str = Form(...),
-        socials: str = Form(...),
+        occupations: str = Form("[]"),
+        socials: str = Form("[]"),
         profile_picture_file: UploadFile | None = File(None),
         curriculum_vitae_file: UploadFile | None = File(None),
         as_pymodel: bool = False
@@ -427,7 +427,9 @@ class AccountProvisionService:
             await self.db.refresh(account, attribute_names=["alumni_profile"])
             await self.upload_manager.commit()
 
-            return AlumniAccountOut.model_validate(account) if as_pymodel else (account, profile)
+            fresh_account = await self.account_repo.get_alumni_by_id(account.id)
+
+            return AlumniAccountOut.model_validate(fresh_account) if as_pymodel else (account, profile)
         except HTTPException as e:
             await self.db.rollback()
             await self.upload_manager.rollback()

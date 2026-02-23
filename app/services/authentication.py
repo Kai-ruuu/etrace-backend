@@ -47,8 +47,14 @@ class AuthenticationService(GeocodingService):
                 raise ValueError("Invalid role value.")
             
     
-    def add_required_info(self, user_info: SystemAdminAccountOut | PesoStaffAccountOut | CompanyAccountOut | AlumniAccountOut | DeanAccountOut) -> dict:
-        if user_info.get("role") == AccountRole.ALUMNI:
+    def add_required_info(
+        self,
+        user_model: Account,
+        user_info: SystemAdminAccountOut | PesoStaffAccountOut | CompanyAccountOut | AlumniAccountOut | DeanAccountOut
+    ) -> dict:
+        if user_model.role == AccountRole.SYSTEM_ADMIN:
+            user_info["is_default"] = user_model.is_default_system_admin
+        elif user_model.role == AccountRole.ALUMNI:
             location_info = self.geocode(user_info["alumni_profile"]["address"])
             user_info["alumni_profile"]["location_info"] = location_info
         
@@ -96,7 +102,7 @@ class AuthenticationService(GeocodingService):
         
         user = await account_repo.get_by_email(db_account.email)
         user_info = self.AccountPymodel(user).model_validate(user).model_dump()
-        return self.add_required_info(user_info)
+        return self.add_required_info(user, user_info)
     
     
     def logout(self, response: Response):
@@ -106,4 +112,4 @@ class AuthenticationService(GeocodingService):
 
     def current_user_to_pymodel(self, user: Account):
         user_info = self.AccountPymodel(user).model_validate(user).model_dump()
-        return self.add_required_info(user_info)
+        return self.add_required_info(user, user_info)

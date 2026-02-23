@@ -11,11 +11,11 @@ from app.schemas.account import CompanyAccountOut
 from app.schemas.company_profile import CompanyProfileOut
 
 
-router = APIRouter(tags=["company"], prefix="/api/v1/user/company")
+router = APIRouter(tags=["company"], prefix="/api/v1/company")
 
 
 @router.patch("/")
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def update(
     request: Request,
     name: str | None=Form(None),
@@ -53,7 +53,7 @@ async def update(
    
 
 @router.get("/search")
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def search(
     request: Request,
     query: str | None = None,
@@ -67,31 +67,31 @@ async def search(
 
 
 @router.patch("/{id}/disable", response_model=CompanyAccountOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def disable(
     request: Request,
     id: int,
     db: AsyncSession = Depends(get_db),
-    user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN, AccountRole.PESO_STAFF])),
+    user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
 ) -> CompanyAccountOut:
     service = CompanyService(db)
     return await service.disable_by_id(user, id, True)
 
 
 @router.patch("/{id}/enable", response_model=CompanyAccountOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def enable(
     request: Request,
     id: int,
     db: AsyncSession = Depends(get_db),
-    user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN, AccountRole.PESO_STAFF])),
+    user: Account = Depends(allow_roles([AccountRole.SYSTEM_ADMIN])),
 ) -> CompanyAccountOut:
     service = CompanyService(db)
     return await service.enable_by_id(user, id, True)
 
 
 @router.patch("/{id}/approve", response_model=CompanyAccountOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def approve(
     request: Request,
     id: int,
@@ -103,7 +103,7 @@ async def approve(
 
 
 @router.patch("/{id}/reject", response_model=CompanyAccountOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def reject(
     request: Request,
     id: int,
@@ -115,7 +115,7 @@ async def reject(
 
 
 @router.patch("/{id}/pend", response_model=CompanyAccountOut)
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def pend(
     request: Request,
     id: int,
